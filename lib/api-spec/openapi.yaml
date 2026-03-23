@@ -9,6 +9,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
   - name: columns
     description: Kanban columns
   - name: tasks
@@ -19,7 +21,6 @@ paths:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -27,6 +28,100 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/user:
+    get:
+      operationId: getCurrentAuthUser
+      tags: [auth]
+      summary: Get the currently authenticated user
+      responses:
+        "200":
+          description: Auth status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUserEnvelope"
+
+  /login:
+    get:
+      operationId: beginBrowserLogin
+      tags: [auth]
+      summary: Start the OIDC login flow
+      parameters:
+        - name: returnTo
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Redirect to OIDC provider
+
+  /callback:
+    get:
+      operationId: handleBrowserLoginCallback
+      tags: [auth]
+      summary: Complete the OIDC login flow
+      parameters:
+        - name: code
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: iss
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Redirect after login
+
+  /logout:
+    get:
+      operationId: browserLogout
+      tags: [auth]
+      summary: Log out
+      responses:
+        "302":
+          description: Redirect after logout
+
+  /mobile-auth/token-exchange:
+    post:
+      operationId: exchangeMobileAuthorizationCode
+      tags: [auth]
+      summary: Mobile token exchange
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExchangeMobileAuthorizationCodeBody"
+      responses:
+        "200":
+          description: Session token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExchangeMobileAuthorizationCodeResponse"
+
+  /mobile-auth/logout:
+    post:
+      operationId: logoutMobileSession
+      tags: [auth]
+      summary: Mobile logout
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogoutMobileSessionResponse"
 
   /columns:
     get:
@@ -45,7 +140,7 @@ paths:
     post:
       operationId: createColumn
       tags: [columns]
-      summary: Create a column
+      summary: Create a column (admin only)
       requestBody:
         required: true
         content:
@@ -64,7 +159,7 @@ paths:
     put:
       operationId: updateColumn
       tags: [columns]
-      summary: Update a column
+      summary: Update a column (admin only)
       parameters:
         - name: id
           in: path
@@ -87,7 +182,7 @@ paths:
     delete:
       operationId: deleteColumn
       tags: [columns]
-      summary: Delete a column
+      summary: Delete a column (admin only)
       parameters:
         - name: id
           in: path
@@ -102,7 +197,7 @@ paths:
     get:
       operationId: getTasks
       tags: [tasks]
-      summary: Get all tasks
+      summary: Get tasks
       parameters:
         - name: columnId
           in: query
@@ -181,8 +276,67 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
+
+    AuthUser:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          nullable: true
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        profileImageUrl:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [admin, user]
+      required: [id, role]
+
+    AuthUserEnvelope:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/AuthUser"
+          nullable: true
+      required: [user]
+
+    ExchangeMobileAuthorizationCodeBody:
+      type: object
+      properties:
+        code:
+          type: string
+        state:
+          type: string
+        nonce:
+          type: string
+          nullable: true
+        code_verifier:
+          type: string
+        redirect_uri:
+          type: string
+      required: [code, state, code_verifier, redirect_uri]
+
+    ExchangeMobileAuthorizationCodeResponse:
+      type: object
+      properties:
+        token:
+          type: string
+      required: [token]
+
+    LogoutMobileSessionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required: [success]
 
     Column:
       type: object
@@ -196,11 +350,7 @@ components:
         createdAt:
           type: string
           format: date-time
-      required:
-        - id
-        - title
-        - position
-        - createdAt
+      required: [id, title, position, createdAt]
 
     CreateColumnRequest:
       type: object
@@ -209,9 +359,7 @@ components:
           type: string
         position:
           type: integer
-      required:
-        - title
-        - position
+      required: [title, position]
 
     UpdateColumnRequest:
       type: object
@@ -228,6 +376,9 @@ components:
           type: integer
         columnId:
           type: integer
+        userId:
+          type: string
+          nullable: true
         title:
           type: string
         description:
@@ -241,13 +392,7 @@ components:
         createdAt:
           type: string
           format: date-time
-      required:
-        - id
-        - columnId
-        - title
-        - priority
-        - position
-        - createdAt
+      required: [id, columnId, title, priority, position, createdAt]
 
     CreateTaskRequest:
       type: object
@@ -264,11 +409,7 @@ components:
           enum: [low, medium, high]
         position:
           type: integer
-      required:
-        - columnId
-        - title
-        - priority
-        - position
+      required: [columnId, title, priority, position]
 
     UpdateTaskRequest:
       type: object

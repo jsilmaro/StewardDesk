@@ -1,6 +1,6 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
 import { db, tasksTable } from "@workspace/db";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, and } from "drizzle-orm";
 import {
   CreateTaskBody,
   UpdateTaskBody,
@@ -11,18 +11,29 @@ import {
 
 const router: IRouter = Router();
 
+function canModifyTask(req: Request, res: Response, next: NextFunction) {
+  if (!req.isAuthenticated()) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  next();
+}
+
 router.get("/", async (req, res) => {
   try {
     const query = GetTasksQueryParams.parse(req.query);
+    const isAdmin = req.isAuthenticated() && req.user.role === "admin";
+    const userId = req.isAuthenticated() ? req.user.id : null;
+
     let tasks;
-    if (query.columnId) {
-      tasks = await db
-        .select()
-        .from(tasksTable)
-        .where(eq(tasksTable.columnId, query.columnId))
-        .orderBy(asc(tasksTable.position));
+    if (isAdmin) {
+      tasks = query.columnId
+        ? await db.select().from(tasksTable).where(eq(tasksTable.columnId, query.columnId)).orderBy(asc(tasksTable.position))
+        : await db.select().from(tasksTable).orderBy(asc(tasksTable.position));
     } else {
-      tasks = await db.select().from(tasksTable).orderBy(asc(tasksTable.position));
+      tasks = query.columnId
+        ? await db.select().from(tasksTable).where(and(eq(tasksTable.columnId, query.columnId), eq(tasksTable.userId, userId!))).orderBy(asc(tasksTable.position))
+        : await db.select().from(tasksTable).where(eq(tasksTable.userId, userId!)).orderBy(asc(tasksTable.position));
     }
     res.json(tasks);
   } catch (err) {
@@ -31,10 +42,11 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", canModifyTask, async (req, res) => {
   try {
     const body = CreateTaskBody.parse(req.body);
-    const [task] = await db.insert(tasksTable).values(body).returning();
+    const userId = req.isAuthenticated() ? req.user.id : undefined;
+    const [task] = await db.insert(tasksTable).values({ ...body, userId }).returning();
     res.status(201).json(task);
   } catch (err) {
     req.log.error({ err }, "Failed to create task");
@@ -42,19 +54,29 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", canModifyTask, async (req, res) => {
   try {
     const { id } = UpdateTaskParams.parse(req.params);
     const body = UpdateTaskBody.parse(req.body);
+    const isAdmin = req.isAuthenticated() && req.user.role === "admin";
+    const userId = req.isAuthenticated() ? req.user.id : null;
+
+    const existing = await db.select().from(tasksTable).where(eq(tasksTable.id, id));
+    if (!existing.length) {
+      res.status(404).json({ error: "Task not found" });
+      return;
+    }
+
+    if (!isAdmin && existing[0].userId !== userId) {
+      res.status(403).json({ error: "Forbidden: you can only edit your own tasks" });
+      return;
+    }
+
     const [task] = await db
       .update(tasksTable)
       .set(body)
       .where(eq(tasksTable.id, id))
       .returning();
-    if (!task) {
-      res.status(404).json({ error: "Task not found" });
-      return;
-    }
     res.json(task);
   } catch (err) {
     req.log.error({ err }, "Failed to update task");
@@ -62,9 +84,23 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", canModifyTask, async (req, res) => {
   try {
     const { id } = DeleteTaskParams.parse(req.params);
+    const isAdmin = req.isAuthenticated() && req.user.role === "admin";
+    const userId = req.isAuthenticated() ? req.user.id : null;
+
+    const existing = await db.select().from(tasksTable).where(eq(tasksTable.id, id));
+    if (!existing.length) {
+      res.status(404).json({ error: "Task not found" });
+      return;
+    }
+
+    if (!isAdmin && existing[0].userId !== userId) {
+      res.status(403).json({ error: "Forbidden: you can only delete your own tasks" });
+      return;
+    }
+
     await db.delete(tasksTable).where(eq(tasksTable.id, id));
     res.status(204).send();
   } catch (err) {

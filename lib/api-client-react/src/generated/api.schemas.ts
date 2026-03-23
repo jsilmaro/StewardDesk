@@ -9,6 +9,42 @@ export interface HealthStatus {
   status: string;
 }
 
+export type AuthUserRole = (typeof AuthUserRole)[keyof typeof AuthUserRole];
+
+export const AuthUserRole = {
+  admin: "admin",
+  user: "user",
+} as const;
+
+export interface AuthUser {
+  id: string;
+  email?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  profileImageUrl?: string | null;
+  role: AuthUserRole;
+}
+
+export interface AuthUserEnvelope {
+  user: AuthUser | null;
+}
+
+export interface ExchangeMobileAuthorizationCodeBody {
+  code: string;
+  state: string;
+  nonce?: string | null;
+  code_verifier: string;
+  redirect_uri: string;
+}
+
+export interface ExchangeMobileAuthorizationCodeResponse {
+  token: string;
+}
+
+export interface LogoutMobileSessionResponse {
+  success: boolean;
+}
+
 export interface Column {
   id: number;
   title: string;
@@ -37,6 +73,7 @@ export const TaskPriority = {
 export interface Task {
   id: number;
   columnId: number;
+  userId?: string | null;
   title: string;
   description?: string | null;
   priority: TaskPriority;
@@ -77,6 +114,16 @@ export interface UpdateTaskRequest {
   priority?: UpdateTaskRequestPriority;
   position?: number;
 }
+
+export type BeginBrowserLoginParams = {
+  returnTo?: string;
+};
+
+export type HandleBrowserLoginCallbackParams = {
+  code?: string;
+  state?: string;
+  iss?: string;
+};
 
 export type GetTasksParams = {
   columnId?: number;

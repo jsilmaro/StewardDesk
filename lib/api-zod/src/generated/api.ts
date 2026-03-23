@@ -8,11 +8,64 @@
 import * as zod from "zod";
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
+});
+
+/**
+ * @summary Get the currently authenticated user
+ */
+export const GetCurrentAuthUserResponse = zod.object({
+  user: zod
+    .object({
+      id: zod.string(),
+      email: zod.string().nullish(),
+      firstName: zod.string().nullish(),
+      lastName: zod.string().nullish(),
+      profileImageUrl: zod.string().nullish(),
+      role: zod.enum(["admin", "user"]),
+    })
+    .nullable(),
+});
+
+/**
+ * @summary Start the OIDC login flow
+ */
+export const BeginBrowserLoginQueryParams = zod.object({
+  returnTo: zod.coerce.string().optional(),
+});
+
+/**
+ * @summary Complete the OIDC login flow
+ */
+export const HandleBrowserLoginCallbackQueryParams = zod.object({
+  code: zod.coerce.string().optional(),
+  state: zod.coerce.string().optional(),
+  iss: zod.coerce.string().optional(),
+});
+
+/**
+ * @summary Mobile token exchange
+ */
+export const ExchangeMobileAuthorizationCodeBody = zod.object({
+  code: zod.string(),
+  state: zod.string(),
+  nonce: zod.string().nullish(),
+  code_verifier: zod.string(),
+  redirect_uri: zod.string(),
+});
+
+export const ExchangeMobileAuthorizationCodeResponse = zod.object({
+  token: zod.string(),
+});
+
+/**
+ * @summary Mobile logout
+ */
+export const LogoutMobileSessionResponse = zod.object({
+  success: zod.boolean(),
 });
 
 /**
@@ -27,7 +80,7 @@ export const GetColumnsResponseItem = zod.object({
 export const GetColumnsResponse = zod.array(GetColumnsResponseItem);
 
 /**
- * @summary Create a column
+ * @summary Create a column (admin only)
  */
 export const CreateColumnBody = zod.object({
   title: zod.string(),
@@ -35,7 +88,7 @@ export const CreateColumnBody = zod.object({
 });
 
 /**
- * @summary Update a column
+ * @summary Update a column (admin only)
  */
 export const UpdateColumnParams = zod.object({
   id: zod.coerce.number(),
@@ -54,14 +107,14 @@ export const UpdateColumnResponse = zod.object({
 });
 
 /**
- * @summary Delete a column
+ * @summary Delete a column (admin only)
  */
 export const DeleteColumnParams = zod.object({
   id: zod.coerce.number(),
 });
 
 /**
- * @summary Get all tasks
+ * @summary Get tasks
  */
 export const GetTasksQueryParams = zod.object({
   columnId: zod.coerce.number().optional(),
@@ -70,6 +123,7 @@ export const GetTasksQueryParams = zod.object({
 export const GetTasksResponseItem = zod.object({
   id: zod.number(),
   columnId: zod.number(),
+  userId: zod.string().nullish(),
   title: zod.string(),
   description: zod.string().nullish(),
   priority: zod.enum(["low", "medium", "high"]),
@@ -107,6 +161,7 @@ export const UpdateTaskBody = zod.object({
 export const UpdateTaskResponse = zod.object({
   id: zod.number(),
   columnId: zod.number(),
+  userId: zod.string().nullish(),
   title: zod.string(),
   description: zod.string().nullish(),
   priority: zod.enum(["low", "medium", "high"]),

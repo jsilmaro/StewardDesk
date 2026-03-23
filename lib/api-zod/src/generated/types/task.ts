@@ -10,6 +10,7 @@ import type { TaskPriority } from "./taskPriority";
 export interface Task {
   id: number;
   columnId: number;
+  userId?: string | null;
   title: string;
   description?: string | null;
   priority: TaskPriority;

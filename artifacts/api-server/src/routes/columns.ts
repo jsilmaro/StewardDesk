@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
 import { db, columnsTable } from "@workspace/db";
 import { eq, asc } from "drizzle-orm";
 import {
@@ -10,6 +10,14 @@ import {
 
 const router: IRouter = Router();
 
+function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  if (!req.isAuthenticated() || req.user.role !== "admin") {
+    res.status(403).json({ error: "Forbidden: admin access required" });
+    return;
+  }
+  next();
+}
+
 router.get("/", async (req, res) => {
   try {
     const columns = await db.select().from(columnsTable).orderBy(asc(columnsTable.position));
@@ -20,7 +28,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", requireAdmin, async (req, res) => {
   try {
     const body = CreateColumnBody.parse(req.body);
     const [column] = await db.insert(columnsTable).values(body).returning();
@@ -31,7 +39,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", requireAdmin, async (req, res) => {
   try {
     const { id } = UpdateColumnParams.parse(req.params);
     const body = UpdateColumnBody.parse(req.body);
@@ -51,7 +59,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", requireAdmin, async (req, res) => {
   try {
     const { id } = DeleteColumnParams.parse(req.params);
     await db.delete(columnsTable).where(eq(columnsTable.id, id));

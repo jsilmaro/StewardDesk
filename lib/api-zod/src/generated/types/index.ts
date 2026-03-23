@@ -6,12 +6,20 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./authUser";
+export * from "./authUserEnvelope";
+export * from "./authUserRole";
+export * from "./beginBrowserLoginParams";
 export * from "./column";
 export * from "./createColumnRequest";
 export * from "./createTaskRequest";
 export * from "./createTaskRequestPriority";
+export * from "./exchangeMobileAuthorizationCodeBody";
+export * from "./exchangeMobileAuthorizationCodeResponse";
 export * from "./getTasksParams";
+export * from "./handleBrowserLoginCallbackParams";
 export * from "./healthStatus";
+export * from "./logoutMobileSessionResponse";
 export * from "./task";
 export * from "./taskPriority";
 export * from "./updateColumnRequest";
