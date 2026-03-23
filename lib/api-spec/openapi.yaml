@@ -1,15 +1,18 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Nature Kanban Task Manager API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: columns
+    description: Kanban columns
+  - name: tasks
+    description: Kanban tasks
 paths:
   /healthz:
     get:
@@ -24,6 +27,153 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /columns:
+    get:
+      operationId: getColumns
+      tags: [columns]
+      summary: Get all columns
+      responses:
+        "200":
+          description: List of columns
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Column"
+    post:
+      operationId: createColumn
+      tags: [columns]
+      summary: Create a column
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateColumnRequest"
+      responses:
+        "201":
+          description: Created column
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Column"
+
+  /columns/{id}:
+    put:
+      operationId: updateColumn
+      tags: [columns]
+      summary: Update a column
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateColumnRequest"
+      responses:
+        "200":
+          description: Updated column
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Column"
+    delete:
+      operationId: deleteColumn
+      tags: [columns]
+      summary: Delete a column
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /tasks:
+    get:
+      operationId: getTasks
+      tags: [tasks]
+      summary: Get all tasks
+      parameters:
+        - name: columnId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+    post:
+      operationId: createTask
+      tags: [tasks]
+      summary: Create a task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTaskRequest"
+      responses:
+        "201":
+          description: Created task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /tasks/{id}:
+    put:
+      operationId: updateTask
+      tags: [tasks]
+      summary: Update a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTaskRequest"
+      responses:
+        "200":
+          description: Updated task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    delete:
+      operationId: deleteTask
+      tags: [tasks]
+      summary: Delete a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +184,104 @@ components:
       required:
         - status
 
+    Column:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        position:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - position
+        - createdAt
+
+    CreateColumnRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        position:
+          type: integer
+      required:
+        - title
+        - position
+
+    UpdateColumnRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        position:
+          type: integer
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+        columnId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        priority:
+          type: string
+          enum: [low, medium, high]
+        position:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - columnId
+        - title
+        - priority
+        - position
+        - createdAt
+
+    CreateTaskRequest:
+      type: object
+      properties:
+        columnId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        priority:
+          type: string
+          enum: [low, medium, high]
+        position:
+          type: integer
+      required:
+        - columnId
+        - title
+        - priority
+        - position
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        columnId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        priority:
+          type: string
+          enum: [low, medium, high]
+        position:
+          type: integer

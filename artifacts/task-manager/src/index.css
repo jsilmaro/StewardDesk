@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: 'DM Sans', sans-serif;
+  --font-display: 'Fraunces', serif;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-border: hsl(var(--primary-border));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary-border: hsl(var(--secondary-border));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted-border: hsl(var(--muted-border));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent-border: hsl(var(--accent-border));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive-border: hsl(var(--destructive-border));
+
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+}
+
+:root {
+  /* Nature Theme - Soft Earthy Organic */
+  
+  /* Warm linen/cream background */
+  --background: 45 30% 96%;
+  /* Deep soil brown text */
+  --foreground: 30 25% 15%;
+  
+  /* Forest green */
+  --primary: 130 30% 40%;
+  --primary-foreground: 0 0% 100%;
+  --primary-border: 130 30% 35%;
+  
+  /* Sage green */
+  --secondary: 100 20% 88%;
+  --secondary-foreground: 130 40% 20%;
+  --secondary-border: 100 20% 80%;
+  
+  /* Warm amber/gold */
+  --accent: 40 80% 55%;
+  --accent-foreground: 40 90% 10%;
+  --accent-border: 40 80% 50%;
+  
+  /* Warm white cards */
+  --card: 0 0% 100%;
+  --card-foreground: 30 25% 15%;
+  --card-border: 45 20% 88%;
+  
+  --popover: 0 0% 100%;
+  --popover-foreground: 30 25% 15%;
+  --popover-border: 45 20% 88%;
+  
+  /* Light sage */
+  --muted: 100 15% 92%;
+  --muted-foreground: 100 10% 45%;
+  --muted-border: 100 15% 85%;
+  
+  /* Earthy tan */
+  --border: 45 20% 85%;
+  --input: 45 20% 85%;
+  --ring: 130 30% 40%;
+  
+  /* Soft terracotta */
+  --destructive: 10 60% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --destructive-border: 10 60% 50%;
+
+  --sidebar: 90 15% 95%;
+  --sidebar-foreground: 30 25% 15%;
+  --sidebar-border: 90 15% 88%;
+
+  --radius: 0.75rem; /* 12px for softer, organic feel */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    /* Subtle organic pattern could go here, but we'll use an image overlay in the UI */
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight text-foreground;
+  }
+}
+
+/* Custom Scrollbar for Kanban */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border) / 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--border));
+}
+
+/* Utilities for visual depth */
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/60 backdrop-blur-md border border-white/40 shadow-xl shadow-black/5;
+  }
+  
+  .card-depth {
+    @apply shadow-sm shadow-black/[0.03] border border-border/50 hover:shadow-md hover:shadow-black/[0.05] transition-all duration-300;
+  }
+}

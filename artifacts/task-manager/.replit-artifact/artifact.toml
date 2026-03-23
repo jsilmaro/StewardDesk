@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Nature Kanban"
+version = "1.0.0"
+id = "artifacts/task-manager"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18810
+
+[services.development]
+run = "pnpm --filter @workspace/task-manager run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/task-manager", "run", "build" ]
+publicDir = "artifacts/task-manager/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18810"
+BASE_PATH = "/"

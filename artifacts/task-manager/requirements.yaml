@@ -1,0 +1,19 @@
+packages:
+  "@hello-pangea/dnd": "Robust drag and drop library for Kanban boards"
+  "framer-motion": "Smooth animations and transitions for cards and modals"
+  "react-hook-form": "Form state management"
+  "@hookform/resolvers": "Zod resolver for react-hook-form"
+  "zod": "Schema validation for forms"
+  "date-fns": "Date formatting for task creation times"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility to merge tailwind classes safely"
+
+images:
+  - path: "artifacts/task-manager/public/images/organic-bg.png"
+    description: "Extremely subtle, light, and airy watercolor texture in soft sage green and warm cream colors. Very minimal, lots of negative space, elegant and clean."
+    aspect_ratio: "21:9"
+
+notes:
+  - "The app uses @hello-pangea/dnd for drag-and-drop between columns."
+  - "Using generated TanStack Query hooks from @workspace/api-client-react."
+  - "Position updates during drag-and-drop are approximated for the mock backend."
