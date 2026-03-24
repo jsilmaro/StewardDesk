@@ -3,8 +3,11 @@ import { MoreHorizontal, Calendar, Leaf } from "lucide-react";
 import { Task, Column } from "@workspace/api-client-react";
 import { cn, formatDate } from "@/lib/utils";
 import { useAuth } from "@workspace/replit-auth-web";
-import { 
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useDeleteTask } from "@/hooks/use-kanban";
 import { useState } from "react";
@@ -21,32 +24,31 @@ export function TaskCard({ task, index, columns }: TaskCardProps) {
   const { user } = useAuth();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const isAdmin = user?.role === "admin";
+  // Only the task owner can edit or delete — admins are read-only monitors
   const isOwner = task.userId === user?.id;
-  const canModify = isAdmin || isOwner;
 
   const priorityConfig = {
     low: {
       bg: "bg-emerald-500/15",
-      text: "text-emerald-300",
+      text: "text-emerald-500 dark:text-emerald-400",
       border: "border-emerald-500/20",
       icon: <Leaf className="w-3 h-3 mr-1" />,
     },
     medium: {
       bg: "bg-amber-500/15",
-      text: "text-amber-300",
+      text: "text-amber-600 dark:text-amber-400",
       border: "border-amber-500/20",
-      icon: <div className="w-2 h-2 rounded-full bg-amber-400 mr-1.5" />,
+      icon: <div className="w-2 h-2 rounded-full bg-amber-500 dark:bg-amber-400 mr-1.5 flex-shrink-0" />,
     },
     high: {
       bg: "bg-red-500/15",
-      text: "text-red-300",
+      text: "text-red-600 dark:text-red-400",
       border: "border-red-500/20",
-      icon: <div className="w-2 h-2 rounded-full bg-red-400 mr-1.5" />,
+      icon: <div className="w-2 h-2 rounded-full bg-red-500 dark:bg-red-400 mr-1.5 flex-shrink-0" />,
     },
   };
 
-  const pConfig = priorityConfig[task.priority as keyof typeof priorityConfig];
+  const pConfig = priorityConfig[task.priority as keyof typeof priorityConfig] ?? priorityConfig.medium;
 
   return (
     <>
@@ -57,34 +59,65 @@ export function TaskCard({ task, index, columns }: TaskCardProps) {
             {...provided.draggableProps}
             {...provided.dragHandleProps}
             className={cn(
-              "group relative flex flex-col gap-3 p-4 mb-2.5 rounded-xl",
-              "bg-white/8 backdrop-blur-sm border transition-all duration-200 ease-out outline-none",
+              "group relative flex flex-col gap-2.5 p-3.5 mb-2 rounded-xl border",
+              "backdrop-blur-sm transition-all duration-200 ease-out outline-none",
               snapshot.isDragging
-                ? "shadow-2xl border-green-400/40 rotate-[1.5deg] scale-[1.02] z-50 cursor-grabbing bg-white/12"
-                : "border-white/10 hover:border-white/20 hover:-translate-y-0.5 hover:bg-white/10 cursor-grab",
+                ? "rotate-[1.5deg] scale-[1.02] z-50 cursor-grabbing shadow-2xl"
+                : "cursor-grab hover:-translate-y-0.5 shadow-sm"
             )}
-            style={provided.draggableProps.style}
+            style={{
+              ...(provided.draggableProps.style ?? {}),
+              background: snapshot.isDragging
+                ? "var(--task-bg-drag)"
+                : "var(--task-bg)",
+              borderColor: snapshot.isDragging
+                ? "var(--task-border-drag)"
+                : "var(--task-border)",
+            }}
+            onMouseEnter={(e) => {
+              if (!snapshot.isDragging) {
+                (e.currentTarget as HTMLDivElement).style.background = "var(--task-bg-hover)";
+                (e.currentTarget as HTMLDivElement).style.borderColor = "var(--task-border-hover)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!snapshot.isDragging) {
+                (e.currentTarget as HTMLDivElement).style.background = "var(--task-bg)";
+                (e.currentTarget as HTMLDivElement).style.borderColor = "var(--task-border)";
+              }
+            }}
           >
-            {/* Header: Title & Menu */}
+            {/* Header */}
             <div className="flex justify-between items-start gap-2">
-              <h4 className="font-medium text-white/90 leading-snug break-words text-sm">
+              <h4
+                className="font-medium text-sm leading-snug break-words flex-1"
+                style={{ color: "var(--task-title)" }}
+              >
                 {task.title}
               </h4>
-              {canModify && (
+
+              {/* Edit menu — only for task owner */}
+              {isOwner && (
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="opacity-0 group-hover:opacity-100 transition-opacity p-1 -mr-2 -mt-1 rounded-md hover:bg-white/10 text-white/50 focus:outline-none focus:opacity-100">
+                  <DropdownMenuTrigger
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 -mr-1.5 -mt-0.5 rounded-md focus:outline-none focus:opacity-100 flex-shrink-0"
+                    style={{ color: "var(--icon-muted)" }}
+                  >
                     <MoreHorizontal className="w-4 h-4" />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40 bg-gray-900/90 backdrop-blur-md border-white/10 shadow-xl rounded-xl">
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-40 rounded-xl shadow-xl dark:bg-gray-900/90 dark:backdrop-blur-md dark:border-white/10 bg-white/95 backdrop-blur-md border-black/10"
+                  >
                     <DropdownMenuItem
                       onClick={() => setIsEditDialogOpen(true)}
-                      className="cursor-pointer text-white/80 focus:text-white focus:bg-white/5"
+                      className="cursor-pointer dark:text-white/80 dark:hover:text-white dark:focus:bg-white/5 text-gray-700 focus:bg-gray-100"
                     >
                       Edit task
                     </DropdownMenuItem>
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       onClick={() => deleteTask({ id: task.id })}
-                      className="text-red-400 focus:text-red-300 focus:bg-white/5 cursor-pointer"
+                      className="text-red-500 focus:text-red-600 dark:text-red-400 dark:focus:text-red-300 dark:focus:bg-white/5 focus:bg-red-50 cursor-pointer"
                     >
                       Delete
                     </DropdownMenuItem>
@@ -93,25 +126,36 @@ export function TaskCard({ task, index, columns }: TaskCardProps) {
               )}
             </div>
 
-            {/* Description Preview */}
+            {/* Description */}
             {task.description && (
-              <p className="text-xs text-white/50 line-clamp-2 leading-relaxed">
+              <p
+                className="text-xs line-clamp-2 leading-relaxed"
+                style={{ color: "var(--task-desc)" }}
+              >
                 {task.description}
               </p>
             )}
 
-            {/* Footer: Priority & Date */}
-            <div className="flex items-center justify-between pt-2 border-t border-white/8">
-              <span className={cn(
-                "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border",
-                pConfig.bg, pConfig.text, pConfig.border
-              )}>
+            {/* Footer */}
+            <div
+              className="flex items-center justify-between pt-2 border-t"
+              style={{ borderColor: "var(--task-divider)" }}
+            >
+              <span
+                className={cn(
+                  "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border",
+                  pConfig.bg, pConfig.text, pConfig.border
+                )}
+              >
                 {pConfig.icon}
                 <span className="capitalize">{task.priority}</span>
               </span>
-              
-              <div className="flex items-center text-xs text-white/35 font-medium">
-                <Calendar className="w-3 h-3 mr-1" />
+
+              <div
+                className="flex items-center text-xs font-medium"
+                style={{ color: "var(--task-meta)" }}
+              >
+                <Calendar className="w-3 h-3 mr-1 flex-shrink-0" />
                 {formatDate(task.createdAt)}
               </div>
             </div>
@@ -119,10 +163,10 @@ export function TaskCard({ task, index, columns }: TaskCardProps) {
         )}
       </Draggable>
 
-      <EditTaskDialog 
-        task={task} 
-        open={isEditDialogOpen} 
-        onOpenChange={setIsEditDialogOpen} 
+      <EditTaskDialog
+        task={task}
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
         columns={columns}
       />
     </>

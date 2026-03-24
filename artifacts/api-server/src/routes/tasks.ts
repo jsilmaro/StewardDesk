@@ -1,6 +1,7 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
 import { db, tasksTable } from "@workspace/db";
 import { eq, asc, and } from "drizzle-orm";
+import type { InferSelectModel } from "drizzle-orm";
 import {
   CreateTaskBody,
   UpdateTaskBody,
@@ -11,7 +12,7 @@ import {
 
 const router: IRouter = Router();
 
-function canModifyTask(req: Request, res: Response, next: NextFunction) {
+function requireAuth(req: Request, res: Response, next: NextFunction) {
   if (!req.isAuthenticated()) {
     res.status(401).json({ error: "Unauthorized" });
     return;
@@ -19,21 +20,26 @@ function canModifyTask(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+// GET /api/tasks — admin sees all tasks (read-only monitor); users see only their own
 router.get("/", async (req, res) => {
   try {
     const query = GetTasksQueryParams.parse(req.query);
     const isAdmin = req.isAuthenticated() && req.user.role === "admin";
     const userId = req.isAuthenticated() ? req.user.id : null;
 
-    let tasks;
+    let tasks: InferSelectModel<typeof tasksTable>[] = [];
     if (isAdmin) {
+      // Admins can view all tasks (monitoring only — no edit rights)
       tasks = query.columnId
         ? await db.select().from(tasksTable).where(eq(tasksTable.columnId, query.columnId)).orderBy(asc(tasksTable.position))
         : await db.select().from(tasksTable).orderBy(asc(tasksTable.position));
-    } else {
+    } else if (userId) {
+      // Users see only their own tasks
       tasks = query.columnId
-        ? await db.select().from(tasksTable).where(and(eq(tasksTable.columnId, query.columnId), eq(tasksTable.userId, userId!))).orderBy(asc(tasksTable.position))
-        : await db.select().from(tasksTable).where(eq(tasksTable.userId, userId!)).orderBy(asc(tasksTable.position));
+        ? await db.select().from(tasksTable).where(and(eq(tasksTable.columnId, query.columnId), eq(tasksTable.userId, userId))).orderBy(asc(tasksTable.position))
+        : await db.select().from(tasksTable).where(eq(tasksTable.userId, userId)).orderBy(asc(tasksTable.position));
+    } else {
+      tasks = [];
     }
     res.json(tasks);
   } catch (err) {
@@ -42,10 +48,11 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", canModifyTask, async (req, res) => {
+// POST /api/tasks — authenticated users can create tasks (auto-tagged with their userId)
+router.post("/", requireAuth, async (req, res) => {
   try {
     const body = CreateTaskBody.parse(req.body);
-    const userId = req.isAuthenticated() ? req.user.id : undefined;
+    const userId = req.user!.id;
     const [task] = await db.insert(tasksTable).values({ ...body, userId }).returning();
     res.status(201).json(task);
   } catch (err) {
@@ -54,20 +61,21 @@ router.post("/", canModifyTask, async (req, res) => {
   }
 });
 
-router.put("/:id", canModifyTask, async (req, res) => {
+// PUT /api/tasks/:id — ONLY the task owner can edit (admins have no edit rights on others' tasks)
+router.put("/:id", requireAuth, async (req, res) => {
   try {
     const { id } = UpdateTaskParams.parse(req.params);
     const body = UpdateTaskBody.parse(req.body);
-    const isAdmin = req.isAuthenticated() && req.user.role === "admin";
-    const userId = req.isAuthenticated() ? req.user.id : null;
+    const userId = req.user!.id;
 
-    const existing = await db.select().from(tasksTable).where(eq(tasksTable.id, id));
-    if (!existing.length) {
+    const [existing] = await db.select().from(tasksTable).where(eq(tasksTable.id, id));
+    if (!existing) {
       res.status(404).json({ error: "Task not found" });
       return;
     }
 
-    if (!isAdmin && existing[0].userId !== userId) {
+    // Strict ownership — no admin override
+    if (existing.userId !== userId) {
       res.status(403).json({ error: "Forbidden: you can only edit your own tasks" });
       return;
     }
@@ -84,19 +92,20 @@ router.put("/:id", canModifyTask, async (req, res) => {
   }
 });
 
-router.delete("/:id", canModifyTask, async (req, res) => {
+// DELETE /api/tasks/:id — ONLY the task owner can delete (admins have no delete rights on others' tasks)
+router.delete("/:id", requireAuth, async (req, res) => {
   try {
     const { id } = DeleteTaskParams.parse(req.params);
-    const isAdmin = req.isAuthenticated() && req.user.role === "admin";
-    const userId = req.isAuthenticated() ? req.user.id : null;
+    const userId = req.user!.id;
 
-    const existing = await db.select().from(tasksTable).where(eq(tasksTable.id, id));
-    if (!existing.length) {
+    const [existing] = await db.select().from(tasksTable).where(eq(tasksTable.id, id));
+    if (!existing) {
       res.status(404).json({ error: "Task not found" });
       return;
     }
 
-    if (!isAdmin && existing[0].userId !== userId) {
+    // Strict ownership — no admin override
+    if (existing.userId !== userId) {
       res.status(403).json({ error: "Forbidden: you can only delete your own tasks" });
       return;
     }

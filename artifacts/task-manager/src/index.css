@@ -55,49 +55,41 @@
   --radius-2xl: calc(var(--radius) + 8px);
 }
 
+/* ============================================================
+   LIGHT MODE — Nature Theme (Warm Earthy, Organic)
+   ============================================================ */
 :root {
-  /* Nature Theme - Soft Earthy Organic */
-  
-  /* Warm linen/cream background */
   --background: 45 30% 96%;
-  /* Deep soil brown text */
   --foreground: 30 25% 15%;
-  
-  /* Forest green */
-  --primary: 130 30% 40%;
+
+  --primary: 130 30% 38%;
   --primary-foreground: 0 0% 100%;
-  --primary-border: 130 30% 35%;
-  
-  /* Sage green */
+  --primary-border: 130 30% 33%;
+
   --secondary: 100 20% 88%;
   --secondary-foreground: 130 40% 20%;
   --secondary-border: 100 20% 80%;
-  
-  /* Warm amber/gold */
+
   --accent: 40 80% 55%;
   --accent-foreground: 40 90% 10%;
   --accent-border: 40 80% 50%;
-  
-  /* Warm white cards */
+
   --card: 0 0% 100%;
   --card-foreground: 30 25% 15%;
   --card-border: 45 20% 88%;
-  
+
   --popover: 0 0% 100%;
   --popover-foreground: 30 25% 15%;
   --popover-border: 45 20% 88%;
-  
-  /* Light sage */
+
   --muted: 100 15% 92%;
   --muted-foreground: 100 10% 45%;
   --muted-border: 100 15% 85%;
-  
-  /* Earthy tan */
+
   --border: 45 20% 85%;
   --input: 45 20% 85%;
   --ring: 130 30% 40%;
-  
-  /* Soft terracotta */
+
   --destructive: 10 60% 55%;
   --destructive-foreground: 0 0% 100%;
   --destructive-border: 10 60% 50%;
@@ -106,7 +98,105 @@
   --sidebar-foreground: 30 25% 15%;
   --sidebar-border: 90 15% 88%;
 
-  --radius: 0.75rem; /* 12px for softer, organic feel */
+  --radius: 0.75rem;
+
+  /* Board overlay + glass tokens */
+  --board-overlay: rgba(0, 0, 0, 0.28);
+  --column-bg: rgba(255, 255, 255, 0.68);
+  --column-border: rgba(0, 0, 0, 0.07);
+  --column-title: rgba(20, 40, 20, 0.85);
+  --column-count-bg: rgba(0, 0, 0, 0.08);
+  --column-count-text: rgba(20, 40, 20, 0.55);
+  --column-divider: rgba(0, 0, 0, 0.07);
+  --task-bg: rgba(255, 255, 255, 0.88);
+  --task-bg-hover: rgba(255, 255, 255, 0.95);
+  --task-bg-drag: rgba(255, 255, 255, 0.98);
+  --task-border: rgba(0, 0, 0, 0.07);
+  --task-border-hover: rgba(0, 0, 0, 0.13);
+  --task-border-drag: rgba(80, 160, 80, 0.45);
+  --task-title: rgba(20, 40, 20, 0.90);
+  --task-desc: rgba(20, 40, 20, 0.55);
+  --task-meta: rgba(20, 40, 20, 0.38);
+  --task-divider: rgba(0, 0, 0, 0.07);
+  --header-bg: rgba(255, 255, 255, 0.22);
+  --header-border: rgba(0, 0, 0, 0.08);
+  --icon-muted: rgba(20, 40, 20, 0.45);
+  --icon-muted-hover: rgba(20, 40, 20, 0.85);
+  --add-col-border: rgba(0, 0, 0, 0.12);
+  --add-col-text: rgba(20, 40, 20, 0.45);
+  --add-col-bg-hover: rgba(0, 0, 0, 0.04);
+  --add-task-text: rgba(20, 40, 20, 0.38);
+}
+
+/* ============================================================
+   DARK MODE — Night Forest Theme
+   ============================================================ */
+.dark {
+  --background: 150 15% 8%;
+  --foreground: 100 10% 90%;
+
+  --primary: 130 40% 48%;
+  --primary-foreground: 0 0% 100%;
+  --primary-border: 130 40% 42%;
+
+  --secondary: 140 15% 18%;
+  --secondary-foreground: 130 20% 80%;
+  --secondary-border: 140 15% 25%;
+
+  --accent: 40 70% 50%;
+  --accent-foreground: 40 90% 10%;
+  --accent-border: 40 70% 44%;
+
+  --card: 150 12% 12%;
+  --card-foreground: 100 10% 88%;
+  --card-border: 140 10% 20%;
+
+  --popover: 150 14% 10%;
+  --popover-foreground: 100 10% 90%;
+  --popover-border: 140 10% 20%;
+
+  --muted: 140 10% 18%;
+  --muted-foreground: 130 8% 55%;
+  --muted-border: 140 10% 22%;
+
+  --border: 140 10% 22%;
+  --input: 140 10% 20%;
+  --ring: 130 40% 48%;
+
+  --destructive: 10 60% 48%;
+  --destructive-foreground: 0 0% 100%;
+  --destructive-border: 10 60% 42%;
+
+  --sidebar: 150 12% 10%;
+  --sidebar-foreground: 100 10% 88%;
+  --sidebar-border: 140 10% 18%;
+
+  /* Board overlay + glass tokens */
+  --board-overlay: rgba(0, 0, 0, 0.60);
+  --column-bg: rgba(0, 0, 0, 0.35);
+  --column-border: rgba(255, 255, 255, 0.10);
+  --column-title: rgba(255, 255, 255, 0.88);
+  --column-count-bg: rgba(255, 255, 255, 0.08);
+  --column-count-text: rgba(255, 255, 255, 0.50);
+  --column-divider: rgba(255, 255, 255, 0.08);
+  --task-bg: rgba(255, 255, 255, 0.07);
+  --task-bg-hover: rgba(255, 255, 255, 0.10);
+  --task-bg-drag: rgba(255, 255, 255, 0.13);
+  --task-border: rgba(255, 255, 255, 0.08);
+  --task-border-hover: rgba(255, 255, 255, 0.18);
+  --task-border-drag: rgba(80, 200, 100, 0.40);
+  --task-title: rgba(255, 255, 255, 0.90);
+  --task-desc: rgba(255, 255, 255, 0.50);
+  --task-meta: rgba(255, 255, 255, 0.35);
+  --task-divider: rgba(255, 255, 255, 0.07);
+  --header-bg: rgba(0, 0, 0, 0.25);
+  --header-border: rgba(255, 255, 255, 0.08);
+  --icon-muted: rgba(255, 255, 255, 0.45);
+  --icon-muted-hover: rgba(255, 255, 255, 0.90);
+  --add-col-border: rgba(255, 255, 255, 0.12);
+  --add-col-text: rgba(255, 255, 255, 0.38);
+  --add-col-bg-hover: rgba(255, 255, 255, 0.04);
+  --add-task-text: rgba(255, 255, 255, 0.35);
 }
 
 @layer base {
@@ -116,7 +206,6 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    /* Subtle organic pattern could go here, but we'll use an image overlay in the UI */
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -124,10 +213,10 @@
   }
 }
 
-/* Custom Scrollbar for Kanban */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -143,13 +232,23 @@
   background: hsl(var(--border));
 }
 
-/* Utilities for visual depth */
+/* Glass utilities */
 @layer utilities {
   .glass-panel {
-    @apply bg-white/60 backdrop-blur-md border border-white/40 shadow-xl shadow-black/5;
+    @apply backdrop-blur-md border shadow-xl shadow-black/10;
+    background: var(--column-bg);
+    border-color: var(--column-border);
   }
-  
+
   .card-depth {
-    @apply shadow-sm shadow-black/[0.03] border border-border/50 hover:shadow-md hover:shadow-black/[0.05] transition-all duration-300;
+    @apply shadow-sm transition-all duration-200;
+    background: var(--task-bg);
+    border-color: var(--task-border);
+  }
+
+  .card-depth:hover {
+    background: var(--task-bg-hover);
+    border-color: var(--task-border-hover);
+    @apply shadow-md -translate-y-0.5;
   }
 }
