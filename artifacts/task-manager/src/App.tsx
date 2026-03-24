@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@workspace/replit-auth-web";
 import { ThemeProvider } from "@/lib/theme";
 import BoardPage from "@/pages/BoardPage";
+import AdminPage from "@/pages/AdminPage";
 import LoginPage from "@/pages/LoginPage";
 import NotFound from "@/pages/not-found";
 
@@ -17,8 +18,8 @@ const queryClient = new QueryClient({
   },
 });
 
-function AuthGate({ children }: { children: React.ReactNode }) {
-  const { isLoading, isAuthenticated } = useAuth();
+function AppRoot() {
+  const { isLoading, isAuthenticated, user } = useAuth();
 
   if (isLoading) {
     return (
@@ -30,7 +31,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 transition-colors duration-300" style={{ background: "var(--board-overlay)" }} />
+        <div className="absolute inset-0" style={{ background: "var(--board-overlay)" }} />
         <div className="relative z-10 flex flex-col items-center gap-4">
           <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-sm" style={{ color: "var(--task-desc)" }}>Loading…</p>
@@ -43,15 +44,19 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     return <LoginPage />;
   }
 
-  return <>{children}</>;
-}
+  // Admin gets a completely separate monitoring dashboard
+  if (user?.role === "admin") {
+    return <AdminPage />;
+  }
 
-function Router() {
+  // Regular users get the personal kanban board
   return (
-    <Switch>
-      <Route path="/" component={BoardPage} />
-      <Route component={NotFound} />
-    </Switch>
+    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+      <Switch>
+        <Route path="/" component={BoardPage} />
+        <Route component={NotFound} />
+      </Switch>
+    </WouterRouter>
   );
 }
 
@@ -60,11 +65,7 @@ function App() {
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <AuthGate>
-              <Router />
-            </AuthGate>
-          </WouterRouter>
+          <AppRoot />
           <Toaster />
         </TooltipProvider>
       </QueryClientProvider>
