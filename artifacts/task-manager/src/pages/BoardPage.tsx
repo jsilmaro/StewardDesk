@@ -45,7 +45,7 @@ export default function BoardPage() {
             className="font-bold text-base tracking-tight hidden sm:block"
             style={{ color: "var(--column-title)" }}
           >
-            Nature Kanban
+            StewardDesk
           </h1>
         </div>
 

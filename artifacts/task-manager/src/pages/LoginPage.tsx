@@ -41,7 +41,7 @@ export default function LoginPage() {
           </div>
           <div>
             <h1 className="text-4xl font-bold drop-shadow-lg tracking-tight text-white">
-              Nature Kanban
+              StewardDesk
             </h1>
             <p className="mt-2 text-base text-white/80 font-medium drop-shadow">
               Cultivate your tasks. Grow your focus.

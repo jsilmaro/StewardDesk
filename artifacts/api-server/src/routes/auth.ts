@@ -66,13 +66,15 @@ async function upsertUser(claims: Record<string, unknown>) {
     profileImageUrl: (claims.profile_image_url || claims.picture) as string | null,
   };
 
+  const { id: _id, ...updateData } = userData;
+
   const [user] = await db
     .insert(usersTable)
     .values(userData)
     .onConflictDoUpdate({
       target: usersTable.id,
       set: {
-        ...userData,
+        ...updateData,
         updatedAt: new Date(),
       },
     })
