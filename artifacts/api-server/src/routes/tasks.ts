@@ -41,6 +41,7 @@ router.get("/", async (req, res) => {
     } else {
       tasks = [];
     }
+    res.setHeader("Cache-Control", "no-store");
     res.json(tasks);
   } catch (err) {
     req.log.error({ err }, "Failed to get tasks");

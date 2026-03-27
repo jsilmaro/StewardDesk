@@ -1,25 +1,43 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { KanbanColumn } from "./Column";
-import { useColumns, useTasks, useUpdateTask } from "@/hooks/use-kanban";
+import { useColumns, useTasks, useUpdateTask, useCreateColumn } from "@/hooks/use-kanban";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Task } from "@workspace/api-client-react";
-import { Plus, Eye } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useAuth } from "@workspace/replit-auth-web";
 import { CreateTaskDialog, CreateColumnDialog } from "./TaskDialogs";
+
+const DEFAULT_COLUMNS = ["To Do", "In Progress", "Done"];
 
 export function Board() {
   const { data: columns, isLoading: isLoadingCols } = useColumns();
   const { data: tasks, isLoading: isLoadingTasks } = useTasks();
   const { mutate: updateTask } = useUpdateTask();
+  const { mutate: createColumn } = useCreateColumn();
   const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
 
   const [localTasks, setLocalTasks] = useState<Task[]>([]);
+  const seededRef = useRef(false);
 
   useEffect(() => {
     if (tasks) setLocalTasks(tasks);
   }, [tasks]);
+
+  // Auto-seed default columns for new users
+  useEffect(() => {
+    if (
+      !isLoadingCols &&
+      columns !== undefined &&
+      columns.length === 0 &&
+      !seededRef.current
+    ) {
+      seededRef.current = true;
+      DEFAULT_COLUMNS.forEach((title, index) => {
+        createColumn({ data: { title, position: index } });
+      });
+    }
+  }, [columns, isLoadingCols, createColumn]);
 
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const [activeColumnId, setActiveColumnId] = useState<number | undefined>();
@@ -40,7 +58,6 @@ export function Board() {
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
-    // Admins cannot drag tasks they don't own
     const taskId = parseInt(draggableId);
     const task = localTasks.find((t) => t.id === taskId);
     if (task && task.userId !== user?.id) return;
@@ -91,23 +108,6 @@ export function Board() {
 
   return (
     <>
-      {/* Admin read-only notice */}
-      {isAdmin && (
-        <div
-          className="mx-5 mt-3 mb-0 flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium border"
-          style={{
-            background: "rgba(251, 191, 36, 0.10)",
-            borderColor: "rgba(251, 191, 36, 0.25)",
-            color: "rgba(251, 191, 36, 0.90)",
-          }}
-        >
-          <Eye className="w-3.5 h-3.5 flex-shrink-0" />
-          <span>
-            Admin view — you can see all tasks for monitoring. Task editing belongs to each user only.
-          </span>
-        </div>
-      )}
-
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="flex gap-4 px-5 pt-4 pb-5 h-full overflow-x-auto items-start snap-x snap-mandatory">
           {safeColumns.map((col) => (
@@ -121,31 +121,28 @@ export function Board() {
             </div>
           ))}
 
-          {/* Add Column — admin only */}
-          {isAdmin && (
-            <button
-              onClick={() => setIsColDialogOpen(true)}
-              className="flex-shrink-0 w-[240px] flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed py-6 transition-all group snap-center backdrop-blur-sm"
-              style={{
-                borderColor: "var(--add-col-border)",
-                color: "var(--add-col-text)",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = "var(--add-col-bg-hover)";
-                (e.currentTarget as HTMLButtonElement).style.color = "var(--icon-muted)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-                (e.currentTarget as HTMLButtonElement).style.color = "var(--add-col-text)";
-              }}
-            >
-              <div className="w-8 h-8 rounded-full flex items-center justify-center transition-colors border"
-                style={{ borderColor: "var(--add-col-border)", background: "rgba(128,128,128,0.06)" }}>
-                <Plus className="w-4 h-4" />
-              </div>
-              <span className="text-sm font-medium">Add Section</span>
-            </button>
-          )}
+          <button
+            onClick={() => setIsColDialogOpen(true)}
+            className="flex-shrink-0 w-[240px] flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed py-6 transition-all group snap-center backdrop-blur-sm"
+            style={{
+              borderColor: "var(--add-col-border)",
+              color: "var(--add-col-text)",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = "var(--add-col-bg-hover)";
+              (e.currentTarget as HTMLButtonElement).style.color = "var(--icon-muted)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+              (e.currentTarget as HTMLButtonElement).style.color = "var(--add-col-text)";
+            }}
+          >
+            <div className="w-8 h-8 rounded-full flex items-center justify-center transition-colors border"
+              style={{ borderColor: "var(--add-col-border)", background: "rgba(128,128,128,0.06)" }}>
+              <Plus className="w-4 h-4" />
+            </div>
+            <span className="text-sm font-medium">Add Section</span>
+          </button>
 
           <div className="flex-shrink-0 w-4" />
         </div>
