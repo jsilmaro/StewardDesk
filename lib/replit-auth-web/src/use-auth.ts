@@ -17,7 +17,10 @@ export function useAuth(): AuthState {
 
   const fetchUser = useCallback(async () => {
     try {
-      const res = await fetch("/api/auth/user", { credentials: "include" });
+      const res = await fetch("/api/auth/user", {
+        credentials: "include",
+        cache: "no-store",
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = (await res.json()) as { user: AuthUser | null };
       setUser(data.user ?? null);

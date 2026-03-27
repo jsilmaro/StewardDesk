@@ -49,6 +49,7 @@ function buildSessionUser(user: typeof usersTable.$inferSelect): SessionData["us
 // ─── Current User ──────────────────────────────────────────────────────────
 
 router.get("/auth/user", (req: Request, res: Response) => {
+  res.setHeader("Cache-Control", "no-store");
   res.json(
     GetCurrentAuthUserResponse.parse({
       user: req.isAuthenticated()
