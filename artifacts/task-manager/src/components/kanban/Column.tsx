@@ -3,7 +3,6 @@ import { Plus, MoreVertical, Trash2 } from "lucide-react";
 import { Task, Column as ColumnType } from "@workspace/api-client-react";
 import { TaskCard } from "./TaskCard";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@workspace/replit-auth-web";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,8 +20,6 @@ interface ColumnProps {
 
 export function KanbanColumn({ column, tasks, allColumns, onAddTask }: ColumnProps) {
   const { mutate: deleteColumn } = useDeleteColumn();
-  const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
 
   const sortedTasks = [...tasks].sort((a, b) => a.position - b.position);
 
@@ -66,27 +63,25 @@ export function KanbanColumn({ column, tasks, allColumns, onAddTask }: ColumnPro
             <Plus className="w-4 h-4" />
           </button>
 
-          {isAdmin && (
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className="p-1.5 rounded-lg transition-colors focus:outline-none"
-                style={{ color: "var(--icon-muted)" }}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className="p-1.5 rounded-lg transition-colors focus:outline-none"
+              style={{ color: "var(--icon-muted)" }}
+            >
+              <MoreVertical className="w-4 h-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-44 rounded-xl shadow-lg dark:bg-gray-900/90 dark:backdrop-blur-md dark:border-white/10 bg-white/95 backdrop-blur-md border-black/10"
+            >
+              <DropdownMenuItem
+                onClick={() => deleteColumn({ id: column.id })}
+                className="text-red-500 focus:text-red-600 dark:text-red-400 dark:focus:text-red-300 dark:focus:bg-white/5 focus:bg-red-50 cursor-pointer flex items-center gap-2"
               >
-                <MoreVertical className="w-4 h-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-44 rounded-xl shadow-lg dark:bg-gray-900/90 dark:backdrop-blur-md dark:border-white/10 bg-white/95 backdrop-blur-md border-black/10"
-              >
-                <DropdownMenuItem
-                  onClick={() => deleteColumn({ id: column.id })}
-                  className="text-red-500 focus:text-red-600 dark:text-red-400 dark:focus:text-red-300 dark:focus:bg-white/5 focus:bg-red-50 cursor-pointer flex items-center gap-2"
-                >
-                  <Trash2 className="w-4 h-4" /> Delete Section
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+                <Trash2 className="w-4 h-4" /> Delete Section
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 

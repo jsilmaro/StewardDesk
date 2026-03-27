@@ -8,6 +8,8 @@ import { authMiddleware } from "./middlewares/authMiddleware";
 
 const app: Express = express();
 
+app.disable("etag");
+
 app.use(
   pinoHttp({
     logger,
