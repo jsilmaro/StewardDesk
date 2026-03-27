@@ -1,8 +1,8 @@
-# Workspace
+# StewardDesk
 
 ## Overview
 
-Nature Kanban — a full-stack Kanban task manager with a forest/nature theme (green leaves, moss, soil brown palette). Built on a pnpm monorepo with authentication (Replit Auth), role-based access control (admin/user), and a forest background image.
+StewardDesk — a full-stack Kanban task manager with a forest/nature theme (green leaves, moss, soil brown palette). Built on a pnpm monorepo with email/password + Google OAuth authentication, and a forest background image.
 
 ## Stack
 
@@ -11,34 +11,33 @@ Nature Kanban — a full-stack Kanban task manager with a forest/nature theme (g
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
 - **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
+- **Database**: PostgreSQL + Drizzle ORM (Neon-compatible)
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
+- **Build**: esbuild (ESM bundle)
 - **Frontend**: React + Vite, TanStack Query, Tailwind CSS, shadcn/ui
-- **Auth**: Replit Auth (OpenID Connect / PKCE), session-based
+- **Auth**: Email/password (bcryptjs) + Google OAuth (google-auth-library), session-based
 - **Drag & Drop**: @hello-pangea/dnd
-- **Forms**: react-hook-form + @hookform/resolvers
 
 ## Structure
 
 ```text
-artifacts-monorepo/
+stewarddesk/
 ├── artifacts/
 │   ├── api-server/         # Express API server (port 8080)
 │   │   └── src/
 │   │       ├── app.ts              # Express app with auth middleware
-│   │       ├── lib/auth.ts         # OIDC session management
+│   │       ├── lib/auth.ts         # Session management (no OIDC)
 │   │       ├── middlewares/authMiddleware.ts
 │   │       └── routes/
-│   │           ├── auth.ts         # Login/callback/logout/user endpoints
-│   │           ├── columns.ts      # Column CRUD (admin writes)
+│   │           ├── auth.ts         # register/login/logout/Google OAuth
+│   │           ├── columns.ts      # Column CRUD
 │   │           └── tasks.ts        # Task CRUD (user-scoped)
 │   └── task-manager/       # React + Vite Kanban frontend (served at /)
 │       └── src/
-│           ├── App.tsx             # Root with AuthGate
+│           ├── App.tsx             # Root with auth gate
 │           ├── pages/
-│           │   ├── LoginPage.tsx   # Forest-bg glassmorphism login
+│           │   ├── LoginPage.tsx   # Email/password + Google login form
 │           │   └── BoardPage.tsx   # Kanban board with auth header
 │           └── components/kanban/  # Board, Column, TaskCard, TaskDialogs
 ├── lib/
@@ -50,12 +49,10 @@ artifacts-monorepo/
 │       └── src/schema/
 │           ├── columns.ts  # Kanban column table
 │           ├── tasks.ts    # Kanban tasks table (userId FK)
-│           └── auth.ts     # users + sessions tables, user_role enum
+│           └── auth.ts     # users + sessions tables
 ├── api/
 │   └── index.ts            # Vercel serverless wrapper for Express app
 ├── vercel.json             # Vercel deployment config
-├── .env.example            # Environment variable template
-├── scripts/
 ├── pnpm-workspace.yaml
 ├── tsconfig.base.json
 ├── tsconfig.json
@@ -64,88 +61,85 @@ artifacts-monorepo/
 
 ## Authentication
 
-- **Provider**: Replit Auth (OIDC/PKCE)
+- **Methods**: Email/password signup/login + Google OAuth
+- **Passwords**: Hashed with bcryptjs (12 rounds)
+- **Google OAuth**: Uses `google-auth-library` OAuth2Client — needs `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET`
 - **Session storage**: PostgreSQL `sessions` table (cookie-based, 7-day TTL)
-- **User table**: `users` with `user_role` enum (`admin` | `user`)
-- **Middleware**: `authMiddleware` populates `req.user` for all `/api` routes
-- **Frontend hook**: `useAuth()` from `@workspace/replit-auth-web` — provides `user`, `isLoading`, `isAuthenticated`, `login()`, `logout()`
+- **User table**: `users` with `password_hash`, `google_id` fields
+- **Frontend hook**: `useAuth()` from `@workspace/replit-auth-web`
 
 ### Auth Endpoints
 
-- `GET /api/login` — redirect to Replit OIDC
-- `GET /api/login/callback` — exchange code, create session, upsert user
-- `GET /api/logout` — clear session cookie + DB session
-- `GET /api/auth/user` — return `{ user: AuthUser | null }`
-
-## Role-Based Access Control
-
-- **Admin**: can create/delete columns; sees all tasks (past all users)
-- **User (member)**: can create their own tasks; sees/edits only their tasks
-- Column write routes (`POST/PUT/DELETE /api/columns`) require `requireAdmin` middleware
-- Task routes filter by `req.user.id` for non-admins
+- `POST /api/auth/register` — create account with email + password
+- `POST /api/auth/login` — sign in with email + password
+- `POST /api/auth/logout` — clear session
+- `GET /api/auth/user` — return `{ user: AuthUser | null }` (no-store)
+- `GET /api/auth/google` — redirect to Google OAuth
+- `GET /api/auth/google/callback` — handle Google callback, create session
 
 ## API Endpoints
 
 - `GET /api/columns` — list all columns
-- `POST /api/columns` — create column (admin only)
-- `PUT /api/columns/:id` — update column (admin only)
-- `DELETE /api/columns/:id` — delete column (admin only)
-- `GET /api/tasks` — list tasks (all for admin, own for users)
-- `POST /api/tasks` — create task (auto-assigns userId)
-- `PUT /api/tasks/:id` — update task (own tasks or admin)
-- `DELETE /api/tasks/:id` — delete task (own tasks or admin)
+- `POST /api/columns` — create column
+- `PUT /api/columns/:id` — update column
+- `DELETE /api/columns/:id` — delete column
+- `GET /api/tasks` — list user's tasks
+- `POST /api/tasks` — create task
+- `PUT /api/tasks/:id` — update task (own only)
+- `DELETE /api/tasks/:id` — delete task (own only)
 
 ## Database Schema
 
 - **columns**: id, title, position, created_at
-- **tasks**: id, column_id (FK→columns), user_id (FK→users, nullable), title, description, priority (enum: low/medium/high), position, created_at
-- **users**: id (varchar, from OIDC sub), email, first_name, last_name, profile_image_url, user_role (enum), created_at, updated_at
-- **sessions**: id (varchar), user_id (FK→users), expires_at, created_at
+- **tasks**: id, column_id (FK→columns), user_id (FK→users), title, description, priority (enum), position, created_at
+- **users**: id (uuid), email (unique), first_name, last_name, profile_image_url, password_hash, google_id (unique), user_role, created_at, updated_at
+- **sessions**: sid (varchar PK), sess (jsonb), expire (timestamp)
 
 ## Environment Variables
 
 ```
-DATABASE_URL=postgresql://...
-REPL_ID=your-replit-app-id
-ISSUER_URL=https://replit.com/oidc
-PORT=8080 (API server)
-BASE_PATH=/ (frontend)
+DATABASE_URL=postgresql://...        # PostgreSQL / Neon connection string
+GOOGLE_CLIENT_ID=...                 # Optional: Google OAuth client ID
+GOOGLE_CLIENT_SECRET=...             # Optional: Google OAuth client secret
+PORT=8080                            # API server port
 NODE_ENV=development|production
 ```
 
 ## Deployment
 
+### Vercel + Neon
+
+1. **Neon DB setup**:
+   - Create a project at [neon.tech](https://neon.tech)
+   - Copy the connection string (use the **Pooled connection** string for serverless)
+   - Set `DATABASE_URL` in Vercel environment variables
+
+2. **Google OAuth** (optional):
+   - [console.cloud.google.com](https://console.cloud.google.com) → Credentials → OAuth 2.0 Client ID
+   - Authorized redirect URI: `https://YOUR_DOMAIN/api/auth/google/callback`
+   - Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in Vercel
+
+3. **Deploy to Vercel**:
+   - Connect the GitHub repo in Vercel dashboard
+   - Root directory: `.` (repo root)
+   - Vercel auto-detects `vercel.json` — no extra config needed
+   - The build command builds the frontend; the API runs as a serverless function
+
+4. **Run DB migrations** after first deploy:
+   ```
+   pnpm --filter @workspace/db run push
+   ```
+
 ### Replit (dev)
 Both workflows run via Replit: API Server (port 8080), task-manager frontend (PORT env var).
-
-### Vercel
-- `vercel.json` routes `/api/*` to `api/index.ts` (serverless Express wrapper)
-- Frontend builds to `artifacts/task-manager/dist/public`
-- Set all environment variables in Vercel dashboard
 
 ## TypeScript & Composite Projects
 
 Every package extends `tsconfig.base.json`. Root `tsconfig.json` lists all packages as project references.
 
-- **Always typecheck from the root** — run `pnpm run typecheck`
-- **`emitDeclarationOnly`** — only `.d.ts` files during typecheck; JS bundled by esbuild/vite
-- **Project references** — when package A depends on package B, A's `tsconfig.json` must list B in `references`
-
-## Root Scripts
-
-- `pnpm run build` — runs `typecheck` first, then recursively builds all packages
-- `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
-
-## Codegen
-
-After changing `lib/api-spec/openapi.yaml`, regenerate the client:
-```
-pnpm --filter @workspace/api-spec run codegen
-```
-
 ## Database Migrations
 
-After changing Drizzle schema, push changes:
+After changing Drizzle schema:
 ```
 pnpm --filter @workspace/db run push
 ```

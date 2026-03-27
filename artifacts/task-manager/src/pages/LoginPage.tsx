@@ -44,7 +44,7 @@ export default function LoginPage() {
         return;
       }
 
-      await refetch();
+      window.location.href = "/";
     } catch {
       setError("Network error. Please check your connection.");
     } finally {
