@@ -43,7 +43,7 @@ export default function LoginPage() {
             <h1 className="text-4xl font-bold drop-shadow-lg tracking-tight text-white">
               Nature Kanban
             </h1>
-            <p className="mt-2 text-base text-green-300 dark:text-green-300 font-medium drop-shadow">
+            <p className="mt-2 text-base text-white/80 font-medium drop-shadow">
               Cultivate your tasks. Grow your focus.
             </p>
           </div>
@@ -61,7 +61,7 @@ export default function LoginPage() {
             className="text-sm mb-6 leading-relaxed"
             style={{ color: "var(--task-desc)" }}
           >
-            Sign in to manage your personal task board. Admins can monitor all tasks and manage columns.
+            Sign in to manage your personal task board.
           </p>
           <button
             onClick={login}

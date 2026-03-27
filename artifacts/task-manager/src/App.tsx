@@ -5,7 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@workspace/replit-auth-web";
 import { ThemeProvider } from "@/lib/theme";
 import BoardPage from "@/pages/BoardPage";
-import AdminPage from "@/pages/AdminPage";
 import LoginPage from "@/pages/LoginPage";
 import NotFound from "@/pages/not-found";
 
@@ -44,12 +43,6 @@ function AppRoot() {
     return <LoginPage />;
   }
 
-  // Admin gets a completely separate monitoring dashboard
-  if (user?.role === "admin") {
-    return <AdminPage />;
-  }
-
-  // Regular users get the personal kanban board
   return (
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
       <Switch>
