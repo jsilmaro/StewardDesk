@@ -44,7 +44,7 @@ stewarddesk/
 │   ├── api-spec/           # OpenAPI spec + Orval codegen config
 │   ├── api-client-react/   # Generated React Query hooks + AuthUser type
 │   ├── api-zod/            # Generated Zod schemas from OpenAPI
-│   ├── replit-auth-web/    # useAuth() hook for React frontend
+│   ├── auth-web/           # useAuth() hook for React frontend
 │   └── db/                 # Drizzle ORM schema + DB connection
 │       └── src/schema/
 │           ├── columns.ts  # Kanban column table
@@ -66,7 +66,7 @@ stewarddesk/
 - **Google OAuth**: Uses `google-auth-library` OAuth2Client — needs `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET`
 - **Session storage**: PostgreSQL `sessions` table (cookie-based, 7-day TTL)
 - **User table**: `users` with `password_hash`, `google_id` fields
-- **Frontend hook**: `useAuth()` from `@workspace/replit-auth-web`
+- **Frontend hook**: `useAuth()` from `@workspace/auth-web`
 
 ### Auth Endpoints
 
@@ -135,8 +135,8 @@ NODE_ENV=development|production
    corepack pnpm --filter @workspace/db run push
    ```
 
-### Replit (dev)
-Both workflows run via Replit: API Server (port 8080), task-manager frontend (PORT env var).
+### Local (dev)
+Run `pnpm dev` from the repo root: API Server (port 8080), task-manager frontend (PORT env var).
 
 ## TypeScript & Composite Projects
 

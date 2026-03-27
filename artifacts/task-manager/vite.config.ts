@@ -16,6 +16,8 @@ export default defineConfig({
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),
       "@assets": path.resolve(import.meta.dirname, "..", "..", "attached_assets"),
+      "@workspace/auth-web": path.resolve(import.meta.dirname, "..", "..", "lib", "auth-web", "src", "index.ts"),
+      "@workspace/api-client-react": path.resolve(import.meta.dirname, "..", "..", "lib", "api-client-react", "src", "index.ts"),
     },
     dedupe: ["react", "react-dom"],
   },
@@ -36,7 +38,7 @@ export default defineConfig({
       },
     },
     fs: {
-      strict: true,
+      strict: false,
       deny: ["**/.*"],
     },
   },
