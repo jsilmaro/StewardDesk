@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useAuth } from "@workspace/auth-web";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAdminStats, useAdminUsers, useAdminTasks, useChangeUserRole } from "@/hooks/use-admin";
 import { useColumns, useCreateColumn, useDeleteColumn } from "@/hooks/use-kanban";

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Leaf, Eye, EyeOff, Loader2 } from "lucide-react";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useAuth } from "@workspace/auth-web";
 
 type Mode = "login" | "register";
 

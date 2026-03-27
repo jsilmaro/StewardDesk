@@ -2,7 +2,7 @@ import { Draggable } from "@hello-pangea/dnd";
 import { MoreHorizontal, Calendar, Leaf } from "lucide-react";
 import { Task, Column } from "@workspace/api-client-react";
 import { cn, formatDate } from "@/lib/utils";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useAuth } from "@workspace/auth-web";
 import {
   DropdownMenu,
   DropdownMenuContent,

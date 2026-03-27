@@ -5,7 +5,7 @@ import { useColumns, useTasks, useUpdateTask, useCreateColumn } from "@/hooks/us
 import { Skeleton } from "@/components/ui/skeleton";
 import { Task } from "@workspace/api-client-react";
 import { Plus } from "lucide-react";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useAuth } from "@workspace/auth-web";
 import { CreateTaskDialog, CreateColumnDialog } from "./TaskDialogs";
 
 const DEFAULT_COLUMNS = ["To Do", "In Progress", "Done"];
