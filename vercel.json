@@ -1,10 +1,10 @@
 {
-  "buildCommand": "pnpm install && pnpm --filter @workspace/task-manager run build",
+  "buildCommand": "pnpm install && pnpm --filter @workspace/api-server run build && pnpm --filter @workspace/task-manager run build",
   "outputDirectory": "artifacts/task-manager/dist/public",
   "installCommand": "pnpm install",
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/index" },
-    { "source": "/:path*", "destination": "/index.html" }
+    { "source": "/((?!api).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
