@@ -38,15 +38,21 @@ export default function LoginPage() {
         body: JSON.stringify(body),
       });
 
-      const data = await res.json() as { error?: string };
+      let apiError: string | null = null;
+      const contentType = res.headers.get("content-type") ?? "";
+      if (contentType.includes("application/json")) {
+        const data = (await res.json()) as { error?: string };
+        apiError = data.error ?? null;
+      }
+
       if (!res.ok) {
-        setError(data.error ?? "Something went wrong. Please try again.");
+        setError(apiError ?? `Request failed (${res.status}). Please try again.`);
         return;
       }
 
       window.location.href = "/";
     } catch {
-      setError("Network error. Please check your connection.");
+      setError("Unable to reach server. Please refresh and try again.");
     } finally {
       setIsLoading(false);
     }

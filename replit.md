@@ -109,6 +109,11 @@ NODE_ENV=development|production
 
 ### Vercel + Neon
 
+0. **Preflight locally before deploy**:
+   ```
+   corepack pnpm run deploy:check
+   ```
+
 1. **Neon DB setup**:
    - Create a project at [neon.tech](https://neon.tech)
    - Copy the connection string (use the **Pooled connection** string for serverless)
@@ -127,7 +132,7 @@ NODE_ENV=development|production
 
 4. **Run DB migrations** after first deploy:
    ```
-   pnpm --filter @workspace/db run push
+   corepack pnpm --filter @workspace/db run push
    ```
 
 ### Replit (dev)
@@ -141,5 +146,5 @@ Every package extends `tsconfig.base.json`. Root `tsconfig.json` lists all packa
 
 After changing Drizzle schema:
 ```
-pnpm --filter @workspace/db run push
+corepack pnpm --filter @workspace/db run push
 ```
