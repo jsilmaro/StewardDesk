@@ -2,6 +2,11 @@
   "buildCommand": "pnpm install && pnpm run typecheck:libs && pnpm --filter @workspace/api-server run build && pnpm --filter @workspace/task-manager run build",
   "outputDirectory": "artifacts/task-manager/dist/public",
   "installCommand": "pnpm install",
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "artifacts/api-server/dist/**"
+    }
+  },
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/index" },
     { "source": "/((?!api).*)", "destination": "/index.html" }
