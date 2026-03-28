@@ -122,11 +122,12 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
 
   // Build app entry (for Vercel serverless)
   await esbuild({
-    entryPoints: [path.resolve(artifactDir, "src/app.ts")],
+    entryPoints: { app: path.resolve(artifactDir, "src/app.ts") },
     platform: "node",
     bundle: true,
     format: "esm",
-    outfile: path.resolve(distDir, "app.mjs"),
+    outdir: distDir,
+    outExtension: { ".js": ".mjs" },
     logLevel: "info",
     external: ["*.node", "pg-native"],
     sourcemap: "linked",
