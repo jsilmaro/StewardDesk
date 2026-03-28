@@ -126,7 +126,7 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
     platform: "node",
     bundle: true,
     format: "esm",
-    outdir: distDir,
+    outdir: path.resolve(distDir, "app"), 
     entryNames: "app",   
     outExtension: { ".js": ".mjs" },  
     logLevel: "info",
