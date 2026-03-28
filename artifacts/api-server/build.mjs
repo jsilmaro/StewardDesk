@@ -126,11 +126,9 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
     platform: "node",
     bundle: true,
     format: "esm",
-    outdir: path.resolve(distDir, "app"), 
-    entryNames: "app",   
-    outExtension: { ".js": ".mjs" },  
+    outfile: path.resolve(distDir, "app.mjs"),
     logLevel: "info",
-    external: ["*.node", "pg-native", "pino", "pino-pretty",],
+    external: ["*.node", "pg-native"],
     sourcemap: "linked",
     plugins: [esbuildPluginPino({ transports: ["pino-pretty"] })],
     banner: {
