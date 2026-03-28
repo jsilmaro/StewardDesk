@@ -142,13 +142,13 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
             {/* Name fields (register only) */}
             {mode === "register" && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full">
                 <input
                   type="text"
                   placeholder="First name"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="flex-1 px-3 py-2.5 rounded-xl border text-sm outline-none transition-all"
+                  className="flex-1 min-w-0 px-3 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{
                     background: "var(--task-bg)",
                     borderColor: "var(--task-border)",
@@ -162,7 +162,7 @@ export default function LoginPage() {
                   placeholder="Last name"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="flex-1 px-3 py-2.5 rounded-xl border text-sm outline-none transition-all"
+                  className="flex-1 min-w-0 px-3 py-2.5 rounded-xl border text-sm outline-none transition-all"
                   style={{
                     background: "var(--task-bg)",
                     borderColor: "var(--task-border)",
