@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm install && pnpm --filter @workspace/api-server run build && pnpm --filter @workspace/task-manager run build",
+  "buildCommand": "pnpm install && pnpm run typecheck:libs && pnpm --filter @workspace/api-server run build && pnpm --filter @workspace/task-manager run build",
   "outputDirectory": "artifacts/task-manager/dist/public",
   "installCommand": "pnpm install",
   "rewrites": [
