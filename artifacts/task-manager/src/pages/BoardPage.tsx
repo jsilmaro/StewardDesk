@@ -1,21 +1,26 @@
+import { useState } from "react";
 import { Board } from "@/components/kanban/Board";
 import { useAuth } from "@workspace/auth-web";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Leaf, LogOut, Shield, User, Settings } from "lucide-react";
+import { Leaf, LogOut, Shield, User, Settings, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function BoardPage() {
   const { user, logout } = useAuth();
   const [, navigate] = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const isAdmin = user?.role === "admin";
   const displayName = user?.firstName
     ? `${user.firstName}${user.lastName ? " " + user.lastName : ""}`
     : (user?.email?.split("@")[0] ?? "User");
 
+  const sidebarBtn = "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all";
+  const sidebarBtnStyle = { color: "var(--task-desc)" };
+
   return (
     <div
-      className="flex flex-col h-screen w-full relative overflow-hidden"
+      className="flex h-screen w-full relative overflow-hidden"
       style={{
         backgroundImage: "url(/images/forest-bg.jpg)",
         backgroundSize: "cover",
@@ -23,121 +28,123 @@ export default function BoardPage() {
         backgroundAttachment: "fixed",
       }}
     >
-      {/* Theme-aware dark overlay */}
-      <div
-        className="absolute inset-0 z-0 transition-colors duration-300"
-        style={{ background: "var(--board-overlay)" }}
-      />
+      {/* Overlay */}
+      <div className="absolute inset-0 z-0 transition-colors duration-300" style={{ background: "var(--board-overlay)" }} />
 
-      {/* Header */}
-      <header
-        className="relative z-10 flex-shrink-0 flex items-center justify-between px-5 h-15 border-b backdrop-blur-md transition-colors duration-300"
+      {/* Mobile overlay backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-20 bg-black/40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`
+          fixed lg:relative z-30 lg:z-10 h-full flex-shrink-0 flex flex-col
+          border-r backdrop-blur-md transition-all duration-300
+          ${sidebarOpen ? "translate-x-0 lg:w-[220px]" : "-translate-x-full lg:translate-x-0 lg:w-0 lg:border-r-0 lg:overflow-hidden"}
+        `}
         style={{
+          width: sidebarOpen ? "220px" : undefined,
           background: "var(--header-bg)",
           borderColor: "var(--header-border)",
-          height: "60px",
         }}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 px-4 py-5 border-b" style={{ borderColor: "var(--header-border)" }}>
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-green-600/80 shadow-lg text-white flex-shrink-0">
             <Leaf className="w-4 h-4" />
           </div>
-          <h1
-            className="font-bold text-base tracking-tight hidden sm:block"
-            style={{ color: "var(--column-title)" }}
-          >
+          <h1 className="font-bold text-base tracking-tight" style={{ color: "var(--column-title)" }}>
             StewardDesk
           </h1>
         </div>
 
-        {/* Right side controls */}
-        <div className="flex items-center gap-2">
-          {/* Role badge */}
-          <div
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
-              isAdmin
-                ? "bg-amber-500/20 text-amber-400 border-amber-500/25"
-                : "bg-green-500/20 text-green-400 border-green-500/25"
-            }`}
-          >
-            {isAdmin ? (
-              <Shield className="w-3 h-3" />
-            ) : (
-              <User className="w-3 h-3" />
-            )}
-            <span className="hidden sm:inline">{isAdmin ? "Admin" : "Member"}</span>
-          </div>
+        {/* Nav */}
+        <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
+          <button className={sidebarBtn} style={{ ...sidebarBtnStyle, background: "var(--task-bg)" }}>
+            <Leaf className="w-4 h-4 text-green-500" />
+            Board
+          </button>
+        </nav>
 
-          {/* User avatar */}
-          <div className="flex items-center gap-2">
+        {/* Bottom section */}
+        <div className="px-3 py-4 border-t flex flex-col gap-1" style={{ borderColor: "var(--header-border)" }}>
+          {/* User info */}
+          <div className="flex items-center gap-2.5 px-3 py-2 mb-1">
             {user?.profileImageUrl ? (
-              <img
-                src={user.profileImageUrl}
-                alt={displayName}
-                className="w-7 h-7 rounded-full border-2 border-white/20 object-cover"
-              />
+              <img src={user.profileImageUrl} alt={displayName} className="w-8 h-8 rounded-full border-2 border-white/20 object-cover flex-shrink-0" />
             ) : (
-              <div
-                className="w-7 h-7 rounded-full bg-green-700/50 border-2 border-white/15 flex items-center justify-center text-white text-xs font-bold"
-              >
+              <div className="w-8 h-8 rounded-full bg-green-700/50 border-2 border-white/15 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                 {displayName.charAt(0).toUpperCase()}
               </div>
             )}
-            <span
-              className="text-sm font-medium hidden md:block"
-              style={{ color: "var(--column-title)" }}
-            >
-              {displayName}
-            </span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-medium truncate" style={{ color: "var(--column-title)" }}>{displayName}</span>
+              <div className={`flex items-center gap-1 text-xs ${isAdmin ? "text-amber-400" : "text-green-400"}`}>
+                {isAdmin ? <Shield className="w-3 h-3" /> : <User className="w-3 h-3" />}
+                {isAdmin ? "Admin" : "Member"}
+              </div>
+            </div>
           </div>
 
-          {/* Theme toggle */}
-          <ThemeToggle compact />
+          <ThemeToggle />
 
-          {/* Settings */}
           <button
             onClick={() => navigate("/settings")}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm transition-all"
-            style={{ color: "var(--icon-muted)" }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.color = "var(--icon-muted-hover)";
-              (e.currentTarget as HTMLButtonElement).style.background = "rgba(128,128,128,0.1)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.color = "var(--icon-muted)";
-              (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-            }}
-            title="Settings"
+            className={sidebarBtn}
+            style={sidebarBtnStyle}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(128,128,128,0.1)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
           >
             <Settings className="w-4 h-4" />
+            Settings
           </button>
 
-          {/* Logout */}
           <button
             onClick={logout}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm transition-all"
-            style={{ color: "var(--icon-muted)" }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.color = "var(--icon-muted-hover)";
-              (e.currentTarget as HTMLButtonElement).style.background = "rgba(128,128,128,0.1)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.color = "var(--icon-muted)";
-              (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-            }}
-            title="Sign out"
+            className={sidebarBtn}
+            style={sidebarBtnStyle}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(128,128,128,0.1)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
           >
             <LogOut className="w-4 h-4" />
-            <span className="hidden sm:block">Sign out</span>
+            Sign out
           </button>
         </div>
-      </header>
+      </aside>
 
-      {/* Main Board */}
-      <main className="relative z-10 flex-1 overflow-hidden">
-        <Board />
-      </main>
+      {/* Main content */}
+      <div className="relative z-10 flex-1 flex flex-col min-w-0">
+        {/* Topbar — mobile menu + desktop sidebar toggle when collapsed */}
+        <div
+          className="flex items-center gap-3 px-4 border-b backdrop-blur-md flex-shrink-0"
+          style={{ height: "56px", background: "var(--header-bg)", borderColor: "var(--header-border)" }}
+        >
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-1.5 rounded-lg transition-opacity opacity-70 hover:opacity-100"
+            style={{ color: "var(--column-title)" }}
+            title={sidebarOpen ? "Collapse sidebar" : "Open sidebar"}
+          >
+            {sidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
+          </button>
+          {!sidebarOpen && (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-6 h-6 rounded-md bg-green-600/80 text-white">
+                <Leaf className="w-3 h-3" />
+              </div>
+              <span className="font-bold text-sm" style={{ color: "var(--column-title)" }}>StewardDesk</span>
+            </div>
+          )}
+        </div>
+
+        <main className="flex-1 overflow-hidden">
+          <Board />
+        </main>
+      </div>
     </div>
   );
 }
