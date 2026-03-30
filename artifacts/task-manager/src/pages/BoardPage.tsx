@@ -80,16 +80,6 @@ export default function BoardPage() {
             <Leaf className="w-4 h-4 text-green-500" />
             Board
           </button>
-          <button
-            onClick={shareBoard}
-            className={sidebarBtn}
-            style={sidebarBtnStyle}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(128,128,128,0.1)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-          >
-            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Share2 className="w-4 h-4" />}
-            {copied ? "Link copied!" : "Share board"}
-          </button>
         </nav>
 
         {/* Bottom section */}
@@ -161,6 +151,21 @@ export default function BoardPage() {
               <span className="font-bold text-sm" style={{ color: "var(--column-title)" }}>StewardDesk</span>
             </div>
           )}
+
+          {/* Share button in topbar */}
+          <button
+            onClick={shareBoard}
+            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all border"
+            style={{
+              color: copied ? "rgb(34,197,94)" : "var(--column-title)",
+              borderColor: copied ? "rgba(34,197,94,0.4)" : "var(--task-border)",
+              background: copied ? "rgba(34,197,94,0.1)" : "var(--task-bg)",
+            }}
+            title="Share board"
+          >
+            {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+            <span className="hidden sm:inline">{copied ? "Copied!" : "Share"}</span>
+          </button>
         </div>
 
         <main className="flex-1 overflow-hidden">
