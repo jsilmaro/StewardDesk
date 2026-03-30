@@ -2,10 +2,12 @@ import { pgTable, serial, text, integer, timestamp, varchar } from "drizzle-orm/
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./auth";
+import { workspacesTable } from "./workspaces";
 
 export const columnsTable = pgTable("columns", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").references(() => usersTable.id, { onDelete: "cascade" }),
+  workspaceId: integer("workspace_id").references(() => workspacesTable.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   position: integer("position").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),

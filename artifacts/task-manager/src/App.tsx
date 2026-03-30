@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/lib/theme";
 import BoardPage from "@/pages/BoardPage";
 import LoginPage from "@/pages/LoginPage";
 import SettingsPage from "@/pages/SettingsPage";
+import JoinPage from "@/pages/JoinPage";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -49,6 +50,7 @@ function AppRoot() {
       <Switch>
         <Route path="/" component={BoardPage} />
         <Route path="/settings" component={SettingsPage} />
+        <Route path="/join/:token" component={JoinPage} />
         <Route component={NotFound} />
       </Switch>
     </WouterRouter>

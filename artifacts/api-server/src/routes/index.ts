@@ -5,6 +5,7 @@ import columnsRouter from "./columns";
 import tasksRouter from "./tasks";
 import adminRouter from "./admin";
 import userRouter from "./user";
+import workspacesRouter from "./workspaces";
 
 const router: IRouter = Router();
 
@@ -33,6 +34,7 @@ router.use(authRouter);
 router.use("/columns", requireAuth, columnsRouter);
 router.use("/tasks", requireAuth, tasksRouter);
 router.use("/user", requireAuth, userRouter);
+router.use("/workspaces", requireAuth, workspacesRouter);
 router.use("/admin", adminRouter);
 
 export default router;

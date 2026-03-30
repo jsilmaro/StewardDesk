@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, columnsTable } from "@workspace/db";
-import { eq, and, asc } from "drizzle-orm";
+import { db, columnsTable, workspaceMembersTable } from "@workspace/db";
+import { eq, and, asc, isNull } from "drizzle-orm";
 import {
   CreateColumnBody,
   UpdateColumnBody,
@@ -10,17 +10,29 @@ import {
 
 const router: IRouter = Router();
 
+// helper — resolve scope: personal or workspace
+function getScope(req: Request): { userId?: string; workspaceId?: number } {
+  const wid = req.query.workspaceId ? Number(req.query.workspaceId) : undefined;
+  return wid ? { workspaceId: wid } : { userId: req.user!.id };
+}
+
+async function assertWorkspaceMember(workspaceId: number, userId: string, res: Response): Promise<boolean> {
+  const [m] = await db.select().from(workspaceMembersTable)
+    .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, userId))).limit(1);
+  if (!m) { res.status(403).json({ error: "Not a workspace member" }); return false; }
+  return true;
+}
+
 router.get("/", async (req, res) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
-    const columns = await db
-      .select()
-      .from(columnsTable)
-      .where(eq(columnsTable.userId, userId))
+    const userId = req.user!.id;
+    const scope = getScope(req);
+    if (scope.workspaceId && !(await assertWorkspaceMember(scope.workspaceId, userId, res))) return;
+
+    const columns = await db.select().from(columnsTable)
+      .where(scope.workspaceId
+        ? eq(columnsTable.workspaceId, scope.workspaceId)
+        : and(eq(columnsTable.userId, userId), isNull(columnsTable.workspaceId)))
       .orderBy(asc(columnsTable.position));
     res.setHeader("Cache-Control", "no-store");
     res.json(columns);
@@ -32,15 +44,13 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
+    const userId = req.user!.id;
+    const scope = getScope(req);
+    if (scope.workspaceId && !(await assertWorkspaceMember(scope.workspaceId, userId, res))) return;
+
     const body = CreateColumnBody.parse(req.body);
-    const [column] = await db
-      .insert(columnsTable)
-      .values({ ...body, userId })
+    const [column] = await db.insert(columnsTable)
+      .values({ ...body, userId: scope.workspaceId ? null : userId, workspaceId: scope.workspaceId ?? null })
       .returning();
     res.setHeader("Cache-Control", "no-store");
     res.status(201).json(column);
@@ -52,22 +62,17 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
+    const userId = req.user!.id;
+    const scope = getScope(req);
+    if (scope.workspaceId && !(await assertWorkspaceMember(scope.workspaceId, userId, res))) return;
+
     const { id } = UpdateColumnParams.parse(req.params);
     const body = UpdateColumnBody.parse(req.body);
-    const [column] = await db
-      .update(columnsTable)
-      .set(body)
-      .where(and(eq(columnsTable.id, id), eq(columnsTable.userId, userId)))
-      .returning();
-    if (!column) {
-      res.status(404).json({ error: "Column not found" });
-      return;
-    }
+    const whereClause = scope.workspaceId
+      ? and(eq(columnsTable.id, id), eq(columnsTable.workspaceId, scope.workspaceId))
+      : and(eq(columnsTable.id, id), eq(columnsTable.userId, userId));
+    const [column] = await db.update(columnsTable).set(body).where(whereClause).returning();
+    if (!column) { res.status(404).json({ error: "Column not found" }); return; }
     res.setHeader("Cache-Control", "no-store");
     res.json(column);
   } catch (err) {
@@ -78,15 +83,15 @@ router.put("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
+    const userId = req.user!.id;
+    const scope = getScope(req);
+    if (scope.workspaceId && !(await assertWorkspaceMember(scope.workspaceId, userId, res))) return;
+
     const { id } = DeleteColumnParams.parse(req.params);
-    await db
-      .delete(columnsTable)
-      .where(and(eq(columnsTable.id, id), eq(columnsTable.userId, userId)));
+    const whereClause = scope.workspaceId
+      ? and(eq(columnsTable.id, id), eq(columnsTable.workspaceId, scope.workspaceId))
+      : and(eq(columnsTable.id, id), eq(columnsTable.userId, userId));
+    await db.delete(columnsTable).where(whereClause);
     res.setHeader("Cache-Control", "no-store");
     res.status(204).send();
   } catch (err) {

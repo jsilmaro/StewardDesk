@@ -2,13 +2,25 @@ import { useState } from "react";
 import { Board } from "@/components/kanban/Board";
 import { useAuth } from "@workspace/auth-web";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Leaf, LogOut, Shield, User, Settings, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Leaf, LogOut, Shield, User, Settings, PanelLeftClose, PanelLeftOpen, Share2, Check } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function BoardPage() {
   const { user, logout } = useAuth();
   const [, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  async function shareBoard() {
+    // create or fetch workspace for this user
+    const res = await fetch("/api/workspaces", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ name: "My Board" }) });
+    if (!res.ok) return;
+    const ws = await res.json() as { inviteToken: string };
+    const link = `${window.location.origin}/join/${ws.inviteToken}`;
+    await navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  }
 
   const isAdmin = user?.role === "admin";
   const displayName = user?.firstName
@@ -67,6 +79,16 @@ export default function BoardPage() {
           <button className={sidebarBtn} style={{ ...sidebarBtnStyle, background: "var(--task-bg)" }}>
             <Leaf className="w-4 h-4 text-green-500" />
             Board
+          </button>
+          <button
+            onClick={shareBoard}
+            className={sidebarBtn}
+            style={sidebarBtnStyle}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(128,128,128,0.1)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+          >
+            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Share2 className="w-4 h-4" />}
+            {copied ? "Link copied!" : "Share board"}
           </button>
         </nav>
 
