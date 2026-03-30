@@ -6,6 +6,7 @@ import { useAuth } from "@workspace/auth-web";
 import { ThemeProvider } from "@/lib/theme";
 import BoardPage from "@/pages/BoardPage";
 import LoginPage from "@/pages/LoginPage";
+import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -47,6 +48,7 @@ function AppRoot() {
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
       <Switch>
         <Route path="/" component={BoardPage} />
+        <Route path="/settings" component={SettingsPage} />
         <Route component={NotFound} />
       </Switch>
     </WouterRouter>

@@ -1,10 +1,12 @@
 import { Board } from "@/components/kanban/Board";
 import { useAuth } from "@workspace/auth-web";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Leaf, LogOut, Shield, User } from "lucide-react";
+import { Leaf, LogOut, Shield, User, Settings } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function BoardPage() {
   const { user, logout } = useAuth();
+  const [, navigate] = useLocation();
 
   const isAdmin = user?.role === "admin";
   const displayName = user?.firstName
@@ -92,6 +94,24 @@ export default function BoardPage() {
 
           {/* Theme toggle */}
           <ThemeToggle compact />
+
+          {/* Settings */}
+          <button
+            onClick={() => navigate("/settings")}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm transition-all"
+            style={{ color: "var(--icon-muted)" }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = "var(--icon-muted-hover)";
+              (e.currentTarget as HTMLButtonElement).style.background = "rgba(128,128,128,0.1)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = "var(--icon-muted)";
+              (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+            }}
+            title="Settings"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
 
           {/* Logout */}
           <button
