@@ -101,31 +101,31 @@
   --radius: 0.75rem;
 
   /* Board overlay + glass tokens */
-  --board-overlay: rgba(0, 0, 0, 0.28);
-  --column-bg: rgba(255, 255, 255, 0.68);
-  --column-border: rgba(0, 0, 0, 0.07);
-  --column-title: rgba(20, 40, 20, 0.85);
+  --board-overlay: rgba(0, 0, 0, 0.18);
+  --column-bg: rgba(255, 255, 255, 0.82);
+  --column-border: rgba(0, 0, 0, 0.09);
+  --column-title: rgb(15, 30, 15);
   --column-count-bg: rgba(0, 0, 0, 0.08);
-  --column-count-text: rgba(20, 40, 20, 0.72);
-  --column-divider: rgba(0, 0, 0, 0.07);
-  --task-bg: rgba(255, 255, 255, 0.88);
-  --task-bg-hover: rgba(255, 255, 255, 0.95);
-  --task-bg-drag: rgba(255, 255, 255, 0.98);
-  --task-border: rgba(0, 0, 0, 0.07);
-  --task-border-hover: rgba(0, 0, 0, 0.13);
-  --task-border-drag: rgba(80, 160, 80, 0.45);
-  --task-title: rgba(20, 40, 20, 0.95);
-  --task-desc: rgba(20, 40, 20, 0.75);
-  --task-meta: rgba(20, 40, 20, 0.60);
+  --column-count-text: rgb(30, 60, 30);
+  --column-divider: rgba(0, 0, 0, 0.08);
+  --task-bg: rgba(255, 255, 255, 0.95);
+  --task-bg-hover: rgba(255, 255, 255, 1);
+  --task-bg-drag: rgba(255, 255, 255, 1);
+  --task-border: rgba(0, 0, 0, 0.09);
+  --task-border-hover: rgba(0, 0, 0, 0.16);
+  --task-border-drag: rgba(60, 140, 60, 0.5);
+  --task-title: rgb(15, 30, 15);
+  --task-desc: rgb(40, 70, 40);
+  --task-meta: rgb(70, 100, 70);
   --task-divider: rgba(0, 0, 0, 0.07);
-  --header-bg: rgba(255, 255, 255, 0.22);
-  --header-border: rgba(0, 0, 0, 0.08);
-  --icon-muted: rgba(20, 40, 20, 0.65);
-  --icon-muted-hover: rgba(20, 40, 20, 0.90);
-  --add-col-border: rgba(0, 0, 0, 0.12);
-  --add-col-text: rgba(20, 40, 20, 0.65);
-  --add-col-bg-hover: rgba(0, 0, 0, 0.04);
-  --add-task-text: rgba(20, 40, 20, 0.60);
+  --header-bg: rgba(255, 255, 255, 0.75);
+  --header-border: rgba(0, 0, 0, 0.09);
+  --icon-muted: rgb(50, 80, 50);
+  --icon-muted-hover: rgb(15, 30, 15);
+  --add-col-border: rgba(0, 0, 0, 0.14);
+  --add-col-text: rgb(60, 90, 60);
+  --add-col-bg-hover: rgba(0, 0, 0, 0.05);
+  --add-task-text: rgb(70, 100, 70);
 }
 
 /* ============================================================
@@ -173,30 +173,30 @@
 
   /* Board overlay + glass tokens */
   --board-overlay: rgba(0, 0, 0, 0.60);
-  --column-bg: rgba(0, 0, 0, 0.35);
+  --column-bg: rgba(10, 20, 10, 0.65);
   --column-border: rgba(255, 255, 255, 0.10);
-  --column-title: rgba(255, 255, 255, 0.88);
-  --column-count-bg: rgba(255, 255, 255, 0.08);
-  --column-count-text: rgba(255, 255, 255, 0.50);
+  --column-title: rgba(255, 255, 255, 0.95);
+  --column-count-bg: rgba(255, 255, 255, 0.10);
+  --column-count-text: rgba(255, 255, 255, 0.70);
   --column-divider: rgba(255, 255, 255, 0.08);
-  --task-bg: rgba(255, 255, 255, 0.07);
-  --task-bg-hover: rgba(255, 255, 255, 0.10);
-  --task-bg-drag: rgba(255, 255, 255, 0.13);
-  --task-border: rgba(255, 255, 255, 0.08);
-  --task-border-hover: rgba(255, 255, 255, 0.18);
+  --task-bg: rgba(255, 255, 255, 0.08);
+  --task-bg-hover: rgba(255, 255, 255, 0.12);
+  --task-bg-drag: rgba(255, 255, 255, 0.15);
+  --task-border: rgba(255, 255, 255, 0.10);
+  --task-border-hover: rgba(255, 255, 255, 0.20);
   --task-border-drag: rgba(80, 200, 100, 0.40);
-  --task-title: rgba(255, 255, 255, 0.90);
-  --task-desc: rgba(255, 255, 255, 0.50);
-  --task-meta: rgba(255, 255, 255, 0.35);
+  --task-title: rgba(255, 255, 255, 0.95);
+  --task-desc: rgba(255, 255, 255, 0.70);
+  --task-meta: rgba(255, 255, 255, 0.50);
   --task-divider: rgba(255, 255, 255, 0.07);
-  --header-bg: rgba(0, 0, 0, 0.25);
-  --header-border: rgba(255, 255, 255, 0.08);
-  --icon-muted: rgba(255, 255, 255, 0.45);
-  --icon-muted-hover: rgba(255, 255, 255, 0.90);
-  --add-col-border: rgba(255, 255, 255, 0.12);
-  --add-col-text: rgba(255, 255, 255, 0.38);
-  --add-col-bg-hover: rgba(255, 255, 255, 0.04);
-  --add-task-text: rgba(255, 255, 255, 0.35);
+  --header-bg: rgba(0, 0, 0, 0.35);
+  --header-border: rgba(255, 255, 255, 0.10);
+  --icon-muted: rgba(255, 255, 255, 0.60);
+  --icon-muted-hover: rgba(255, 255, 255, 0.95);
+  --add-col-border: rgba(255, 255, 255, 0.15);
+  --add-col-text: rgba(255, 255, 255, 0.55);
+  --add-col-bg-hover: rgba(255, 255, 255, 0.06);
+  --add-task-text: rgba(255, 255, 255, 0.50);
 }
 
 @layer base {
