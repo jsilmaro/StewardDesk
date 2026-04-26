@@ -1,5 +1,4 @@
 import { pgTable, serial, text, timestamp, varchar, pgEnum } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { usersTable } from "./auth";
 
 export const workspaceRoleEnum = pgEnum("workspace_role", ["owner", "editor", "viewer"]);
@@ -8,7 +7,8 @@ export const workspacesTable = pgTable("workspaces", {
   id: serial("id").primaryKey(),
   name: text("name").notNull().default("My Board"),
   ownerId: varchar("owner_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
-  inviteToken: varchar("invite_token").unique().notNull().default(sql`gen_random_uuid()`),
+  inviteToken: varchar("invite_token").unique().notNull(),
+  viewerToken: varchar("viewer_token").unique().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

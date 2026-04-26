@@ -2,6 +2,7 @@ import { pgTable, serial, text, integer, timestamp, pgEnum, varchar } from "driz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { columnsTable } from "./columns";
+import { workspacesTable } from "./workspaces";
 
 export const priorityEnum = pgEnum("priority", ["low", "medium", "high"]);
 
@@ -9,6 +10,7 @@ export const tasksTable = pgTable("tasks", {
   id: serial("id").primaryKey(),
   columnId: integer("column_id").notNull().references(() => columnsTable.id, { onDelete: "cascade" }),
   userId: varchar("user_id"),
+  workspaceId: integer("workspace_id").references(() => workspacesTable.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description"),
   priority: priorityEnum("priority").notNull().default("medium"),

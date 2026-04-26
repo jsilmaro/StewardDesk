@@ -2,24 +2,55 @@ import { useState } from "react";
 import { Board } from "@/components/kanban/Board";
 import { useAuth } from "@workspace/auth-web";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Leaf, LogOut, Shield, User, Settings, PanelLeftClose, PanelLeftOpen, Share2, Check } from "lucide-react";
+import { Leaf, LogOut, Shield, User, Settings, PanelLeftClose, PanelLeftOpen, Share2, Check, Copy, Eye, Pencil, X } from "lucide-react";
 import { useLocation } from "wouter";
+
+type ShareRole = "editor" | "viewer";
 
 export default function BoardPage() {
   const { user, logout } = useAuth();
   const [, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareRole, setShareRole] = useState<ShareRole>("editor");
+  const [shareLink, setShareLink] = useState("");
   const [copied, setCopied] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
 
-  async function shareBoard() {
-    // create or fetch workspace for this user
-    const res = await fetch("/api/workspaces", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ name: "My Board" }) });
-    if (!res.ok) return;
-    const ws = await res.json() as { inviteToken: string };
-    const link = `${window.location.origin}/join/${ws.inviteToken}`;
-    await navigator.clipboard.writeText(link);
+  async function generateLink(role: ShareRole) {
+    setShareLoading(true);
+    setShareRole(role);
+    try {
+      const res = await fetch("/api/workspaces", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name: `${user?.firstName ?? "My"}'s Board` }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const ws = await res.json() as { inviteToken?: string; viewerToken?: string };
+      const token = role === "editor" ? ws.inviteToken : (ws.viewerToken ?? ws.inviteToken);
+      if (!token) throw new Error("No token returned");
+      setShareLink(`${window.location.origin}/join/${token}`);
+    } catch (e) {
+      console.error("Share failed:", e);
+      setShareLink("Error generating link — please try again");
+    } finally {
+      setShareLoading(false);
+    }
+  }
+
+  async function copyLink() {
+    await navigator.clipboard.writeText(shareLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
+  }
+
+  function openShare() {
+    setShareLink("");
+    setCopied(false);
+    setShowShareModal(true);
+    generateLink("editor");
   }
 
   const isAdmin = user?.role === "admin";
@@ -154,17 +185,17 @@ export default function BoardPage() {
 
           {/* Share button in topbar */}
           <button
-            onClick={shareBoard}
+            onClick={openShare}
             className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all border"
             style={{
-              color: copied ? "rgb(34,197,94)" : "var(--column-title)",
-              borderColor: copied ? "rgba(34,197,94,0.4)" : "var(--task-border)",
-              background: copied ? "rgba(34,197,94,0.1)" : "var(--task-bg)",
+              color: "var(--column-title)",
+              borderColor: "var(--task-border)",
+              background: "var(--task-bg)",
             }}
             title="Share board"
           >
-            {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
-            <span className="hidden sm:inline">{copied ? "Copied!" : "Share"}</span>
+            <Share2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Share</span>
           </button>
         </div>
 
@@ -172,6 +203,64 @@ export default function BoardPage() {
           <Board />
         </main>
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowShareModal(false)} />
+          <div
+            className="relative z-10 w-full max-w-md rounded-2xl p-6 border shadow-2xl"
+            style={{ background: "var(--column-bg)", borderColor: "var(--column-border)" }}
+          >
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-base font-semibold" style={{ color: "var(--column-title)" }}>Share board</h2>
+              <button onClick={() => setShowShareModal(false)} className="opacity-50 hover:opacity-100 transition-opacity" style={{ color: "var(--column-title)" }}>
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Role picker */}
+            <p className="text-xs mb-3" style={{ color: "var(--task-desc)" }}>Choose what invited people can do:</p>
+            <div className="flex gap-2 mb-5">
+              <button
+                onClick={() => generateLink("editor")}
+                className={`flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${shareRole === "editor" ? "border-green-500/50 bg-green-500/10 text-green-400" : ""}`}
+                style={shareRole !== "editor" ? { borderColor: "var(--task-border)", color: "var(--task-desc)", background: "var(--task-bg)" } : {}}
+              >
+                <Pencil className="w-4 h-4" />
+                Can edit
+              </button>
+              <button
+                onClick={() => generateLink("viewer")}
+                className={`flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${shareRole === "viewer" ? "border-green-500/50 bg-green-500/10 text-green-400" : ""}`}
+                style={shareRole !== "viewer" ? { borderColor: "var(--task-border)", color: "var(--task-desc)", background: "var(--task-bg)" } : {}}
+              >
+                <Eye className="w-4 h-4" />
+                Can view
+              </button>
+            </div>
+
+            {/* Link */}
+            <div className="flex gap-2">
+              <input
+                readOnly
+                value={shareLoading ? "Generating link…" : shareLink}
+                className="flex-1 min-w-0 px-3 py-2 rounded-xl border text-xs outline-none"
+                style={{ background: "var(--task-bg)", borderColor: "var(--task-border)", color: "var(--task-desc)" }}
+              />
+              <button
+                onClick={copyLink}
+                disabled={shareLoading || !shareLink}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all disabled:opacity-50"
+                style={{ background: copied ? "rgba(34,197,94,0.15)" : "var(--task-bg)", color: copied ? "rgb(34,197,94)" : "var(--column-title)", border: "1px solid", borderColor: copied ? "rgba(34,197,94,0.4)" : "var(--task-border)" }}
+              >
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copied ? "Copied!" : "Copy"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
